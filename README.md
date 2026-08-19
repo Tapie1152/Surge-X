@@ -18,3 +18,7 @@ A modern e-hailing platform built for Cape Town, South Africa.
 - Real-time GPS tracking
 - Fair pricing engine
 - Built with Kotlin + Jetpack Compose
+
+## 🌐 Live Website
+
+[Visit the SurgeX Website](https://tapie1152.github.io/Surge-X/)
