@@ -14,154 +14,236 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.surgex.app.ui.components.SurgeMap
 import com.surgex.app.ui.theme.SurgeBlack
 import com.surgex.app.ui.theme.SurgeGrey
 import com.surgex.app.ui.theme.SurgeSurface
-import com.surgex.app.ui.theme.SurgeSurfaceLight
 import com.surgex.app.ui.theme.SurgeWhite
 
 @Composable
 fun DriverHomeScreen(
     onOnlineChanged: (Boolean) -> Unit = {},
     onRideRequest: () -> Unit = {},
-    onSwitchToRider: () -> Unit = {}
+    onSwitchToRider: () -> Unit = {},
+    onDocumentsClick: () -> Unit = {}
 ) {
-    var online by remember { mutableStateOf(false) }
+    var isOnline by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxSize().background(SurgeBlack)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SurgeBlack)
     ) {
-        DriverHeader(online = online, onSwitchToRider = onSwitchToRider)
+        // Real Map
+        SurgeMap(
+            startLatitude = -33.9249,
+            startLongitude = 18.4241,
+            zoomLevel = 14.0,
+            showMyLocation = true
+        )
 
-        Box(
+        // Top Bar
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .background(Color(0xFF101010)),
-            contentAlignment = Alignment.Center
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "DRIVER MAP",
-                    color = SurgeWhite.copy(alpha = 0.06f),
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    text = "LOCATION READY",
-                    color = SurgeWhite.copy(alpha = 0.05f),
-                    fontSize = 9.sp,
-                    letterSpacing = 3.sp
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(14.dp)
-                    .clip(CircleShape)
-                    .background(SurgeWhite)
-            )
-        }
 
-        DriverControlPanel(
-            online = online,
-            onToggleOnline = {
-                online = !online
-                onOnlineChanged(online)
-            }
-        )
-    }
-}
 
-@Composable
-private fun DriverHeader(online: Boolean, onSwitchToRider: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 18.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(text = "SurgeX", color = SurgeWhite, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+            // Menu
+            CircleButton(text = "☰")
+
             Text(
-                text = if (online) "ONLINE" else "OFFLINE",
-                color = if (online) SurgeWhite else SurgeGrey,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            )
-        }
-
-        // Switch to Rider mode
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF1A1A1A))
-                .clickable { onSwitchToRider() },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "🧍", fontSize = 18.sp)
-        }
-    }
-}
-
-@Composable
-private fun DriverControlPanel(online: Boolean, onToggleOnline: () -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color(0xFF0A0A0A),
-        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 22.dp, vertical = 22.dp)) {
-            Text(
-                text = if (online) "You're ready to earn." else "You're offline.",
+                text = "SurgeX Driver",
                 color = SurgeWhite,
-                fontSize = 25.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold
             )
-            Spacer(modifier = Modifier.height(7.dp))
-            Text(
-                text = if (online) "We'll notify you when a ride request arrives."
-                else "Go online when you're ready to receive rides.",
-                color = SurgeGrey,
-                fontSize = 13.sp
-            )
-            Spacer(modifier = Modifier.height(18.dp))
-            Button(
-                onClick = onToggleOnline,
-                modifier = Modifier.fillMaxWidth().height(58.dp),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (online) SurgeSurfaceLight else SurgeWhite,
-                    contentColor = if (online) SurgeWhite else SurgeBlack
-                )
+
+            // Switch back to Rider mode
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF1A1A1A))
+                    .clickable { onSwitchToRider() },
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = if (online) "GO OFFLINE" else "GO ONLINE",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.sp
-                )
+                Text(text = "👤", fontSize = 18.sp)
             }
-            Spacer(modifier = Modifier.height(18.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SummaryCard(title = "TODAY", value = "R0.00", modifier = Modifier.weight(1f))
-                SummaryCard(title = "TRIPS", value = "0", modifier = Modifier.weight(1f))
-                SummaryCard(title = "ONLINE", value = "0m", modifier = Modifier.weight(1f))
+        }
+
+        // Bottom Sheet
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+                color = Color(0xFF0A0A0A)
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 22.dp)
+                ) {
+                    // Drag handle
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color(0xFF2A2A2A))
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Online / Offline Toggle
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(SurgeSurface)
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = if (isOnline) "You are Online" else "You are Offline",
+                                color = SurgeWhite,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = if (isOnline) "Ready to receive rides" else "Go online to start earning",
+                                color = SurgeGrey,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        Switch(
+                            checked = isOnline,
+                            onCheckedChange = {
+                                isOnline = it
+                                onOnlineChanged(it)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFF00C853),
+                                uncheckedThumbColor = Color.White,
+                                uncheckedTrackColor = Color(0xFF333333)
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    // Quick Actions
+                    Text(
+                        text = "Quick Actions",
+                        color = SurgeGrey,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ActionButton(
+                            title = "Documents",
+                            emoji = "📄",
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            onDocumentsClick()
+                        }
+
+                        ActionButton(
+                            title = "Earnings",
+                            emoji = "💰",
+                            modifier = Modifier.weight(1f)
+                        ) {}
+
+                        ActionButton(
+                            title = "Support",
+                            emoji = "🆘",
+                            modifier = Modifier.weight(1f)
+                        ) {}
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Simulate Ride Request (for testing)
+                    if (isOnline) {
+                        Button(
+                            onClick = onRideRequest,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF00C853),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Text(
+                                text = "SIMULATE RIDE REQUEST",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SummaryCard(title: String, value: String, modifier: Modifier) {
-    Column(
-        modifier = modifier.background(SurgeSurface, RoundedCornerShape(15.dp)).padding(14.dp)
+private fun CircleButton(text: String) {
+    Box(
+        modifier = Modifier
+            .size(46.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.72f)),
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = title, color = SurgeGrey, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(text = value, color = SurgeWhite, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+        Text(text = text, color = SurgeWhite, fontSize = 18.sp)
+    }
+}
+
+@Composable
+private fun ActionButton(
+    title: String,
+    emoji: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(SurgeSurface)
+            .clickable { onClick() }
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = emoji, fontSize = 22.sp)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = title,
+            color = SurgeWhite,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

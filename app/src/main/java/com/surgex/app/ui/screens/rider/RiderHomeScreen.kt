@@ -5,15 +5,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.surgex.app.ui.components.SurgeMap
 import com.surgex.app.ui.theme.SurgeBlack
 import com.surgex.app.ui.theme.SurgeGrey
 import com.surgex.app.ui.theme.SurgeSurface
@@ -25,6 +29,9 @@ fun RiderHomeScreen(
     onChooseRide: () -> Unit,
     onSwitchToDriver: () -> Unit = {}
 ) {
+    var pickup by remember { mutableStateOf("Current location") }
+    var destination by remember { mutableStateOf("") }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -32,40 +39,24 @@ fun RiderHomeScreen(
     ) {
         MapFoundation()
         TopBar(onSwitchToDriver = onSwitchToDriver)
-        RideRequestSheet(onChooseRide = onChooseRide)
+        RideRequestSheet(
+            pickup = pickup,
+            onPickupChange = { pickup = it },
+            destination = destination,
+            onDestinationChange = { destination = it },
+            onChooseRide = onChooseRide
+        )
     }
 }
 
 @Composable
 private fun MapFoundation() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF101010)),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "MAP",
-                color = Color.White.copy(alpha = 0.06f),
-                fontSize = 42.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-            Text(
-                text = "LOCATION READY",
-                color = Color.White.copy(alpha = 0.05f),
-                fontSize = 10.sp,
-                letterSpacing = 3.sp
-            )
-        }
-        Box(
-            modifier = Modifier
-                .size(14.dp)
-                .clip(CircleShape)
-                .background(SurgeWhite)
-                .align(Alignment.Center)
-        )
-    }
+    SurgeMap(
+        startLatitude = -33.9249,   // Cape Town
+        startLongitude = 18.4241,
+        zoomLevel = 14.0,
+        showMyLocation = true
+    )
 }
 
 @Composable
@@ -114,14 +105,24 @@ private fun CircleButton(text: String) {
 }
 
 @Composable
-private fun RideRequestSheet(onChooseRide: () -> Unit) {
+private fun RideRequestSheet(
+    pickup: String,
+    onPickupChange: (String) -> Unit,
+    destination: String,
+    onDestinationChange: (String) -> Unit,
+    onChooseRide: () -> Unit
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         Surface(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
             color = Color(0xFF0A0A0A)
         ) {
             Column(modifier = Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
+
+                // Drag handle
                 Box(
                     modifier = Modifier
                         .width(40.dp)
@@ -130,29 +131,84 @@ private fun RideRequestSheet(onChooseRide: () -> Unit) {
                         .background(Color(0xFF2A2A2A))
                         .align(Alignment.CenterHorizontally)
                 )
+
                 Spacer(modifier = Modifier.height(22.dp))
-                Text(text = "Where to?", color = SurgeWhite, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
+
+                Text(
+                    text = "Where to?",
+                    color = SurgeWhite,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
-                LocationInput(label = "Pickup location", value = "Current location")
+
+                // Pickup field (now typeable)
+                LocationInput(
+                    label = "Pickup location",
+                    value = pickup,
+                    onValueChange = onPickupChange,
+                    placeholder = "Enter pickup location"
+                )
+
                 Spacer(modifier = Modifier.height(10.dp))
-                LocationInput(label = "Destination", value = "Search destination")
+
+                // Destination field (now typeable)
+                LocationInput(
+                    label = "Destination",
+                    value = destination,
+                    onValueChange = onDestinationChange,
+                    placeholder = "Where are you going?"
+                )
+
                 Spacer(modifier = Modifier.height(22.dp))
-                Text(text = "Quick destinations", color = SurgeGrey, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+
+                Text(
+                    text = "Quick destinations",
+                    color = SurgeGrey,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
                 Spacer(modifier = Modifier.height(12.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickDestination(title = "Home", modifier = Modifier.weight(1f))
-                    QuickDestination(title = "Work", modifier = Modifier.weight(1f))
-                    QuickDestination(title = "Recent", modifier = Modifier.weight(1f))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    QuickDestination(title = "Home", modifier = Modifier.weight(1f)) {
+                        onDestinationChange("Home")
+                    }
+                    QuickDestination(title = "Work", modifier = Modifier.weight(1f)) {
+                        onDestinationChange("Work")
+                    }
+                    QuickDestination(title = "Recent", modifier = Modifier.weight(1f)) {
+                        onDestinationChange("Recent place")
+                    }
                 }
+
                 Spacer(modifier = Modifier.height(22.dp))
+
                 Button(
                     onClick = onChooseRide,
-                    modifier = Modifier.fillMaxWidth().height(58.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp),
                     shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SurgeWhite, contentColor = SurgeBlack)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SurgeWhite,
+                        contentColor = SurgeBlack
+                    ),
+                    enabled = destination.isNotBlank()
                 ) {
-                    Text(text = "CHOOSE A RIDE", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+                    Text(
+                        text = "CHOOSE A RIDE",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp
+                    )
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -160,36 +216,71 @@ private fun RideRequestSheet(onChooseRide: () -> Unit) {
 }
 
 @Composable
-private fun LocationInput(label: String, value: String) {
-    Row(
+private fun LocationInput(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(SurgeSurface)
-            .clickable { }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(SurgeWhite))
-        Spacer(modifier = Modifier.width(14.dp))
-        Column {
-            Text(text = label, color = SurgeGrey, fontSize = 11.sp)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(text = value, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-        }
+        Text(
+            text = label,
+            color = SurgeGrey,
+            fontSize = 11.sp
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = TextStyle(
+                color = SurgeWhite,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            cursorBrush = SolidColor(SurgeWhite),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            decorationBox = { innerTextField ->
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        color = Color(0xFF555555),
+                        fontSize = 15.sp
+                    )
+                }
+                innerTextField()
+            }
+        )
     }
 }
 
 @Composable
-private fun QuickDestination(title: String, modifier: Modifier = Modifier) {
+private fun QuickDestination(
+    title: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Box(
         modifier = modifier
             .height(48.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(SurgeSurfaceLight)
-            .clickable { },
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(text = title, color = SurgeWhite, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+        Text(
+            text = title,
+            color = SurgeWhite,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

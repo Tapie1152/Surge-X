@@ -9,6 +9,7 @@ import com.surgex.app.core.trip.SurgeXTripController
 import com.surgex.app.domain.payment.PaymentMethod
 import com.surgex.app.ui.screens.auth.LoginScreen
 import com.surgex.app.ui.screens.auth.OtpScreen
+import com.surgex.app.ui.screens.auth.DriverDetailsScreen
 import com.surgex.app.ui.screens.auth.PhoneVerifyScreen
 import com.surgex.app.ui.screens.auth.RegisterScreen
 import com.surgex.app.ui.screens.driver.*
@@ -28,6 +29,7 @@ private enum class SurgeXScreen {
     RIDE_SELECTION,
     SEARCHING_DRIVER,
     DRIVER_HOME,
+    DRIVER_DOCUMENTS,
     DRIVER_RIDE_REQUEST,
     DRIVER_PICKUP,
     PASSENGER_VERIFICATION,
@@ -59,24 +61,24 @@ fun SurgeXNavigation() {
     var pendingPhone by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        if (!authController.isLoggedIn) {
+    if (!authController.isLoggedIn) {
+        checkingSession = false
+        currentScreen = SurgeXScreen.LOGIN          // ← Go straight to Login
+    } else {
+        val profile = authController.getCurrentUserProfile()
+        if (profile == null || profile.accountStatus != "APPROVED") {
+            authController.logout()
             checkingSession = false
-            currentScreen = SurgeXScreen.ROLE_SELECTION
+            currentScreen = SurgeXScreen.LOGIN
         } else {
-            val profile = authController.getCurrentUserProfile()
-            if (profile == null || profile.accountStatus != "APPROVED") {
-                authController.logout()
-                checkingSession = false
-                currentScreen = SurgeXScreen.ROLE_SELECTION
-            } else {
-                selectedRole = profile.activeMode
-                preferences.edit().putString(LAST_MODE_KEY, profile.activeMode.name).apply()
-                checkingSession = false
-                currentScreen = if (profile.activeMode == UserRole.RIDER)
-                    SurgeXScreen.RIDER_HOME else SurgeXScreen.DRIVER_HOME
-            }
+            // Always start in Rider mode by default
+            selectedRole = UserRole.RIDER
+            preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
+            checkingSession = false
+            currentScreen = SurgeXScreen.RIDER_HOME
         }
     }
+}
 
     if (checkingSession) {
         SplashScreen {}
@@ -107,21 +109,18 @@ fun SurgeXNavigation() {
         }
 
         SurgeXScreen.LOGIN -> {
-            LoginScreen(
-                authController = authController,
-                onLoginSuccess = {
-                    scope.launch {
-                        val profile = authController.getCurrentUserProfile()
-                        selectedRole = profile?.activeMode ?: UserRole.RIDER
-                        currentScreen = if (selectedRole == UserRole.RIDER)
-                            SurgeXScreen.RIDER_HOME else SurgeXScreen.DRIVER_HOME
-                    }
-                },
-                onRegister = { currentScreen = SurgeXScreen.REGISTER },
-                onBack = { currentScreen = SurgeXScreen.ROLE_SELECTION }
-            )
-        }
-
+    LoginScreen(
+        authController = authController,
+        onLoginSuccess = {
+            // Always go to Rider mode after login
+            selectedRole = UserRole.RIDER
+            preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
+            currentScreen = SurgeXScreen.RIDER_HOME
+        },
+        onRegister = { currentScreen = SurgeXScreen.REGISTER },
+        onBack = { /* optional: do nothing or close app */ }
+    )
+}
         SurgeXScreen.REGISTER -> {
             RegisterScreen(
                 role = selectedRole,
@@ -144,16 +143,18 @@ fun SurgeXNavigation() {
         }
 
         SurgeXScreen.OTP_VERIFY -> {
-            OtpScreen(
-                phoneNumber = pendingPhone,
-                authController = authController,
-                onVerified = {
-                    currentScreen = if (selectedRole == UserRole.RIDER)
-                        SurgeXScreen.RIDER_HOME else SurgeXScreen.DRIVER_HOME
-                },
-                onBack = { currentScreen = SurgeXScreen.PHONE_VERIFY }
-            )
-        }
+    OtpScreen(
+        phoneNumber = pendingPhone,
+        authController = authController,
+        onVerified = {
+            // After verification always start in Rider mode
+            selectedRole = UserRole.RIDER
+            preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
+            currentScreen = SurgeXScreen.RIDER_HOME
+        },
+        onBack = { currentScreen = SurgeXScreen.PHONE_VERIFY }
+    )
+}
 
         SurgeXScreen.RIDER_HOME -> {
             RiderHomeScreen(
@@ -197,21 +198,31 @@ fun SurgeXNavigation() {
         }
 
         SurgeXScreen.DRIVER_HOME -> {
-            DriverHomeScreen(
-                onOnlineChanged = {},
-                onRideRequest = { currentScreen = SurgeXScreen.DRIVER_RIDE_REQUEST },
-                onSwitchToRider = {
-                    scope.launch {
-                        val saved = authController.saveActiveMode(UserRole.RIDER)
-                        if (saved) {
-                            selectedRole = UserRole.RIDER
-                            preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
-                            currentScreen = SurgeXScreen.RIDER_HOME
-                        }
-                    }
+    DriverHomeScreen(
+        onOnlineChanged = {},
+        onRideRequest = { currentScreen = SurgeXScreen.DRIVER_RIDE_REQUEST },
+        onSwitchToRider = {
+            scope.launch {
+                val saved = authController.saveActiveMode(UserRole.RIDER)
+                if (saved) {
+                    selectedRole = UserRole.RIDER
+                    preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
+                    currentScreen = SurgeXScreen.RIDER_HOME
                 }
-            )
+            }
+        },
+        onDocumentsClick = {
+            currentScreen = SurgeXScreen.DRIVER_DOCUMENTS
         }
+    )
+SurgeXScreen.DRIVER_DOCUMENTS -> {
+    // For now we use a simplified version that works with current AuthController
+    // We will improve saving later
+    DriverDocumentsScreen(
+        onBack = { currentScreen = SurgeXScreen.DRIVER_HOME },
+        onSaved = { currentScreen = SurgeXScreen.DRIVER_HOME }
+    )
+}
 
         SurgeXScreen.DRIVER_RIDE_REQUEST -> {
             DriverRideRequestScreen(
