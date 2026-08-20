@@ -34,15 +34,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
- fun RiderHomeScreen(
+fun RiderHomeScreen(
     onChooseRide: () -> Unit,
-    onSwitchToDriver: () -> Unit = {},
-    onTripHistory: () -> Unit = {},
-    onPaymentMethods: () -> Unit = {},
-    onSafety: () -> Unit = {},
-    onSettings: () -> Unit = {}
-)   
-
+    onSwitchToDriver: () -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
 
     var pickup by remember { mutableStateOf("Current location") }
@@ -128,29 +123,15 @@ import kotlinx.coroutines.launch
             exit = slideOutHorizontally(tween(300)) { -it }
         ) {
             SideMenu(
-    onClose = { menuOpen = false },
-    onSwitchToDriver = {
-        menuOpen = false
-        onSwitchToDriver()
-    },
-    onHome = { menuOpen = false },
-    onTripHistory = {
-        menuOpen = false
-        onTripHistory()
-    },
-    onPaymentMethods = {
-        menuOpen = false
-        onPaymentMethods()
-    },
-    onSafety = {
-        menuOpen = false
-        onSafety()
-    },
-    onSettings = {
-        menuOpen = false
-        onSettings()
+                onClose = { menuOpen = false },
+                onSwitchToDriver = {
+                    menuOpen = false
+                    onSwitchToDriver()
+                }
+            )
+        }
     }
-)
+}
 
 @Composable
 private fun TopBar(
@@ -198,15 +179,7 @@ private fun TopBar(
 }
 
 @Composable
-private fun SideMenu(
-    onClose: () -> Unit,
-    onSwitchToDriver: () -> Unit,
-    onHome: () -> Unit = {},
-    onTripHistory: () -> Unit = {},
-    onPaymentMethods: () -> Unit = {},
-    onSafety: () -> Unit = {},
-    onSettings: () -> Unit = {}
-) {
+private fun SideMenu(onClose: () -> Unit, onSwitchToDriver: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -221,15 +194,15 @@ private fun SideMenu(
             Spacer(modifier = Modifier.height(40.dp))
             Divider(color = Color(0xFF1A1A1A))
             Spacer(modifier = Modifier.height(24.dp))
-            MenuItemRow(icon = "🏠", label = "Home", onClick = onHome)
+            MenuItemRow(icon = "🏠", label = "Home")
             Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "🧾", label = "Trip History", onClick = onTripHistory)
+            MenuItemRow(icon = "🧾", label = "Trip History")
             Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "💳", label = "Payment Methods", onClick = onPaymentMethods)
+            MenuItemRow(icon = "💳", label = "Payment Methods")
             Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "🛡️", label = "Safety", onClick = onSafety)
+            MenuItemRow(icon = "🛡️", label = "Safety")
             Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "⚙️", label = "Settings", onClick = onSettings)
+            MenuItemRow(icon = "⚙️", label = "Settings")
             Spacer(modifier = Modifier.height(24.dp))
             Divider(color = Color(0xFF1A1A1A))
             Spacer(modifier = Modifier.height(24.dp))
@@ -257,23 +230,6 @@ private fun SideMenu(
         }
     }
 }
-
-@Composable
-private fun MenuItemRow(icon: String, label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = icon, fontSize = 18.sp)
-        Spacer(modifier = Modifier.width(14.dp))
-        Text(text = label, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-    }
-}
-
 
 @Composable
 private fun MenuItemRow(icon: String, label: String) {

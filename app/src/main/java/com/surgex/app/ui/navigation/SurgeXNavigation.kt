@@ -23,7 +23,9 @@ private enum class SurgeXScreen {
     RIDER_HOME, RIDE_SELECTION, SEARCHING_DRIVER,
     DRIVER_HOME, DRIVER_RIDE_REQUEST, DRIVER_PICKUP,
     PASSENGER_VERIFICATION, LIVE_TRIP, TRIP_SUMMARY,
-    RIDER_PAYMENT, RECEIPT
+    RIDER_PAYMENT, RECEIPT,
+    TRIP_HISTORY, PAYMENT_METHODS, SAFETY, SETTINGS,
+    HELP, REPORT_ISSUE, DRIVER_DOCUMENTS
 }
 
 private const val PREFS_NAME = "surgex_preferences"
@@ -144,19 +146,20 @@ fun SurgeXNavigation(
             onBack = { currentScreen = SurgeXScreen.PHONE_VERIFY }
         )
 
-        SurgeXScreen.RIDER_HOME -> RiderHomeScreen(
-            onChooseRide = { currentScreen = SurgeXScreen.RIDE_SELECTION },
-            onSwitchToDriver = {
-                scope.launch {
-                    val saved = authController.saveActiveMode(UserRole.DRIVER)
-                    if (saved) {
-                        selectedRole = UserRole.DRIVER
-                        preferences.edit().putString(LAST_MODE_KEY, UserRole.DRIVER.name).apply()
-                        currentScreen = SurgeXScreen.DRIVER_HOME
-                    }
-                }
-            }
-        )
+       SurgeXScreen.RIDER_HOME -> RiderHomeScreen(
+    onChooseRide = { currentScreen = SurgeXScreen.RIDE_SELECTION },
+    onSwitchToDriver = {
+        selectedRole = UserRole.DRIVER
+        preferences.edit().putString(LAST_MODE_KEY, UserRole.DRIVER.name).apply()
+        scope.launch { authController.saveActiveMode(UserRole.DRIVER) }
+        currentScreen = SurgeXScreen.DRIVER_DOCUMENTS
+    },
+    onTripHistory = { currentScreen = SurgeXScreen.TRIP_HISTORY },
+    onPaymentMethods = { currentScreen = SurgeXScreen.PAYMENT_METHODS },
+    onSafety = { currentScreen = SurgeXScreen.SAFETY },
+    onSettings = { currentScreen = SurgeXScreen.SETTINGS }
+) 
+
 
         SurgeXScreen.RIDE_SELECTION -> RideSelectionScreen(
             onBack = { currentScreen = SurgeXScreen.RIDER_HOME },
@@ -265,5 +268,42 @@ fun SurgeXNavigation(
                 )
             }
         }
+
+        SurgeXScreen.TRIP_HISTORY -> TripHistoryScreen(
+            onBack = { currentScreen = SurgeXScreen.RIDER_HOME }
+        )
+
+        SurgeXScreen.PAYMENT_METHODS -> PaymentMethodsScreen(
+            preferences = preferences,
+            onBack = { currentScreen = SurgeXScreen.RIDER_HOME }
+        )
+
+        SurgeXScreen.SAFETY -> SafetyScreen(
+            onBack = { currentScreen = SurgeXScreen.RIDER_HOME }
+        )
+
+        SurgeXScreen.SETTINGS -> SettingsScreen(
+            preferences = preferences,
+            onBack = { currentScreen = SurgeXScreen.RIDER_HOME },
+            onHelp = { currentScreen = SurgeXScreen.HELP },
+            onReportIssue = { currentScreen = SurgeXScreen.REPORT_ISSUE }
+        )
+
+        SurgeXScreen.HELP -> HelpScreen(
+            onBack = { currentScreen = SurgeXScreen.SETTINGS }
+        )
+
+        SurgeXScreen.REPORT_ISSUE -> ReportIssueScreen(
+            onBack = { currentScreen = SurgeXScreen.SETTINGS }
+        )
+
+        SurgeXScreen.DRIVER_DOCUMENTS -> DriverDocumentsScreen(
+            onBack = {
+                selectedRole = UserRole.RIDER
+                preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
+                currentScreen = SurgeXScreen.RIDER_HOME
+            },
+            onSaved = { currentScreen = SurgeXScreen.DRIVER_HOME }
+        )
     }
 }
