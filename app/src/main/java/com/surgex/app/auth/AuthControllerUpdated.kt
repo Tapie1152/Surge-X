@@ -177,10 +177,10 @@ class AuthControllerUpdated {
         val uid = auth.currentUser?.uid ?: return AuthResult.Error("No user logged in.")
         return try {
             db.collection("users").document(uid)
-                .update(
+                .update(mapOf(
                     "driverProfile" to driverProfile,
                     "activeMode" to "DRIVER"
-                ).await()
+                )).await()
             AuthResult.Success
         } catch (e: Exception) {
             AuthResult.Error(e.message ?: "Failed to save driver profile.")
