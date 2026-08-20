@@ -21,11 +21,6 @@ data class UserProfile(
     val phoneVerified: Boolean = false
 )
 
-sealed class AuthResult {
-    object Success : AuthResult()
-    data class Error(val message: String) : AuthResult()
-}
-
 class AuthController {
 
     private val auth = FirebaseAuth.getInstance()
