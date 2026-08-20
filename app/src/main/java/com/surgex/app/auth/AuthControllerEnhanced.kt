@@ -11,11 +11,6 @@ import com.surgex.app.data.models.RiderProfile
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
-sealed class AuthResult {
-    object Success : AuthResult()
-    data class Error(val message: String) : AuthResult()
-}
-
 class AuthControllerEnhanced {
 
     private val auth = FirebaseAuth.getInstance()
