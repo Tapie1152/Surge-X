@@ -1,6 +1,8 @@
 package com.surgex.app.auth
 
 import android.app.Activity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,6 +34,9 @@ class AuthController {
 
     val currentUser: FirebaseUser? get() = auth.currentUser
     val isLoggedIn: Boolean get() = auth.currentUser != null
+
+    // Web Client ID from Firebase
+    private val webClientId = "629944240953-8o0qmd7noccdkj26pm7luoq6meq47edj.apps.googleusercontent.com"
 
     suspend fun register(
         name: String,
@@ -69,6 +74,52 @@ class AuthController {
         }
     }
 
+    suspend fun signInWithGoogle(activity: Activity): AuthResult {
+        return try {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(webClientId)
+                .requestEmail()
+                .build()
+
+            val googleSignInClient = GoogleSignIn.getClient(activity, gso)
+            googleSignInClient.signOut().await()
+
+            val signInIntent = googleSignInClient.signInIntent
+            activity.startActivityForResult(signInIntent, 9001)
+
+            AuthResult.Success
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Google Sign-In failed.")
+        }
+    }
+
+    suspend fun handleGoogleSignInResult(idToken: String): AuthResult {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val result = auth.signInWithCredential(credential).await()
+            val user = result.user ?: return AuthResult.Error("Google Sign-In failed.")
+
+            val doc = db.collection("users").document(user.uid).get().await()
+            if (!doc.exists()) {
+                val userData = hashMapOf(
+                    "name" to (user.displayName ?: ""),
+                    "email" to (user.email ?: ""),
+                    "phone" to "",
+                    "role" to UserRole.RIDER.name,
+                    "activeMode" to UserRole.RIDER.name,
+                    "accountStatus" to "APPROVED",
+                    "phoneVerified" to true,
+                    "createdAt" to System.currentTimeMillis()
+                )
+                db.collection("users").document(user.uid).set(userData).await()
+            }
+
+            AuthResult.Success
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Google Sign-In failed.")
+        }
+    }
+
     fun sendOtp(
         phoneNumber: String,
         activity: Activity,
@@ -81,7 +132,7 @@ class AuthController {
                 onAutoVerified()
             }
             override fun onVerificationFailed(e: FirebaseException) {
-                onError(e.message ?: "Failed to send OTP. Check the number and try again.")
+                onError(e.message ?: "Failed to send OTP.")
             }
             override fun onCodeSent(
                 verificationId: String,
@@ -109,8 +160,7 @@ class AuthController {
             val credential = PhoneAuthProvider.getCredential(verificationId, otp)
             auth.currentUser?.linkWithCredential(credential)?.await()
             val uid = auth.currentUser?.uid ?: return AuthResult.Error("No user found.")
-            db.collection("users").document(uid)
-                .update("phoneVerified", true).await()
+            db.collection("users").document(uid).update("phoneVerified", true).await()
             AuthResult.Success
         } catch (e: Exception) {
             AuthResult.Error(e.message ?: "Invalid OTP. Please try again.")
@@ -141,8 +191,7 @@ class AuthController {
     suspend fun saveActiveMode(role: UserRole): Boolean {
         val uid = auth.currentUser?.uid ?: return false
         return try {
-            db.collection("users").document(uid)
-                .update("activeMode", role.name).await()
+            db.collection("users").document(uid).update("activeMode", role.name).await()
             true
         } catch (e: Exception) {
             false

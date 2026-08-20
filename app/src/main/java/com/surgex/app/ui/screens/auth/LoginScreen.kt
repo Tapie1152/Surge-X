@@ -1,8 +1,10 @@
 package com.surgex.app.ui.screens.auth
 
+import android.app.Activity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,9 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -28,13 +32,17 @@ fun LoginScreen(
     authController: AuthController,
     onLoginSuccess: () -> Unit,
     onRegister: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onGoogleSignIn: ((Boolean) -> Unit) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activity = context as? Activity
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var isGoogleLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var visible by remember { mutableStateOf(false) }
 
@@ -58,8 +66,6 @@ fun LoginScreen(
             .fillMaxSize()
             .background(Color(0xFF050505))
     ) {
-
-        // Glow
         Box(
             modifier = Modifier
                 .size(360.dp)
@@ -68,10 +74,7 @@ fun LoginScreen(
                 .scale(pulse)
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color(0xFF00E5FF).copy(alpha = 0.04f),
-                            Color.Transparent
-                        )
+                        colors = listOf(Color(0xFF00E5FF).copy(alpha = 0.04f), Color.Transparent)
                     ),
                     shape = RoundedCornerShape(50)
                 )
@@ -96,9 +99,7 @@ fun LoginScreen(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.sp
                     )
-
                     Spacer(modifier = Modifier.height(56.dp))
-
                     Text(
                         text = "Sign in.",
                         color = Color.White,
@@ -106,9 +107,7 @@ fun LoginScreen(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-1.5).sp
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     Text(
                         text = "Welcome back to SurgeX.",
                         color = Color(0xFF505050),
@@ -118,13 +117,77 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(52.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             AnimatedVisibility(
                 visible = visible,
                 enter = fadeIn(tween(700, 150)) + slideInVertically(tween(700, 150)) { 50 }
             ) {
                 Column {
+
+                    // Google Sign-In
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.dp, Color(0xFF2A2A2A), RoundedCornerShape(16.dp))
+                            .background(Color(0xFF0D0D0D))
+                            .clickable(enabled = !isGoogleLoading && !isLoading) {
+                                if (activity != null) {
+                                    isGoogleLoading = true
+                                    errorMessage = null
+                                    scope.launch {
+                                        authController.signInWithGoogle(activity)
+                                        onGoogleSignIn { success ->
+                                            isGoogleLoading = false
+                                            if (success) onLoginSuccess()
+                                            else errorMessage = "Google Sign-In failed. Try again."
+                                        }
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isGoogleLoading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "G",
+                                    color = Color(0xFF4285F4),
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "Continue with Google",
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // OR divider
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Divider(modifier = Modifier.weight(1f), color = Color(0xFF1A1A1A))
+                        Text(text = "  or  ", color = Color(0xFF333333), fontSize = 12.sp)
+                        Divider(modifier = Modifier.weight(1f), color = Color(0xFF1A1A1A))
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
                     SurgeXTextField(
                         value = email,
                         onValueChange = { email = it; errorMessage = null },
@@ -132,7 +195,7 @@ fun LoginScreen(
                         keyboardType = KeyboardType.Email
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     SurgeXTextField(
                         value = password,
@@ -160,7 +223,7 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(36.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
                     Button(
                         onClick = {
@@ -169,8 +232,12 @@ fun LoginScreen(
                                 password.isBlank() -> errorMessage = "Please enter your password."
                                 else -> {
                                     isLoading = true
+                                    errorMessage = null
                                     scope.launch {
-                                        when (val result = authController.login(email.trim(), password)) {
+                                        when (val result = authController.login(
+                                            email.trim(),
+                                            password
+                                        )) {
                                             is AuthResult.Success -> onLoginSuccess()
                                             is AuthResult.Error -> {
                                                 errorMessage = result.message
@@ -187,7 +254,7 @@ fun LoginScreen(
                             containerColor = Color.White,
                             disabledContainerColor = Color(0xFF1C1C1C)
                         ),
-                        enabled = !isLoading
+                        enabled = !isLoading && !isGoogleLoading
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
@@ -206,7 +273,7 @@ fun LoginScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
