@@ -168,12 +168,13 @@ fun DriverDetailsScreen(
                 color = Color(0xFF1A1A1A),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                         .clickable { expandedCategory = !expandedCategory },
-                    contentAlignment = Alignment.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(carCategory, color = Color.White)
                     Icon(Icons.Filled.ArrowDropDown, contentDescription = "Dropdown", tint = Color.White)
