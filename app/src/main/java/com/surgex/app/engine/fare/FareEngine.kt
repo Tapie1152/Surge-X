@@ -2,6 +2,7 @@ package com.surgex.app.engine.fare
 
 import com.surgex.app.domain.fare.FareBreakdown
 import com.surgex.app.domain.fare.FareInput
+import com.surgex.app.domain.fare.RideCategory
 
 class FareEngine {
 
@@ -14,30 +15,26 @@ class FareEngine {
         perMinute: Double = 1.50,
         bookingFee: Double = 5.00,
         waitingFee: Double = 0.00,
-        tolls: Double = 0.00
+        tolls: Double = 0.00,
+        category: RideCategory = RideCategory.SURGEX
     ): FareBreakdown {
 
         val normal = FareInput(
             distanceKm = distanceKm,
             durationMinutes = durationMinutes,
-            baseFare = baseFare,
-            perKm = perKm,
-            perMinute = perMinute,
-            bookingFee = bookingFee,
-            waitingFee = waitingFee,
-            tolls = tolls
+            category = category
         )
 
-        val distanceFare = normal.distanceKm * normal.perKm
-        val timeFare = normal.durationMinutes * normal.perMinute
+        val distanceFare = distanceKm * perKm
+        val timeFare = durationMinutes * perMinute
 
         val subtotal =
-            normal.baseFare +
+            baseFare +
             distanceFare +
             timeFare +
-            normal.bookingFee +
-            normal.waitingFee +
-            normal.tolls
+            bookingFee +
+            waitingFee +
+            tolls
 
         val total = subtotal * surgeMultiplier
 
@@ -47,12 +44,13 @@ class FareEngine {
          * surgeAmount, so we preserve compatibility with the UI.
          */
         return FareBreakdown(
-            baseFare = normal.baseFare,
+            category = category,
+            baseFare = baseFare,
             distanceFare = distanceFare,
             timeFare = timeFare,
-            bookingFee = normal.bookingFee,
-            waitingFee = normal.waitingFee,
-            tolls = normal.tolls,
+            bookingFee = bookingFee,
+            waitingFee = waitingFee,
+            tolls = tolls,
             total = total
         )
     }
