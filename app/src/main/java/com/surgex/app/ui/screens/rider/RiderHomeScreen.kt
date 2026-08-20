@@ -34,15 +34,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
- fun RiderHomeScreen(
+fun RiderHomeScreen(
     onChooseRide: () -> Unit,
     onSwitchToDriver: () -> Unit = {},
     onTripHistory: () -> Unit = {},
     onPaymentMethods: () -> Unit = {},
     onSafety: () -> Unit = {},
     onSettings: () -> Unit = {}
-)   
-
+) {
     val scope = rememberCoroutineScope()
 
     var pickup by remember { mutableStateOf("Current location") }
@@ -128,29 +127,32 @@ import kotlinx.coroutines.launch
             exit = slideOutHorizontally(tween(300)) { -it }
         ) {
             SideMenu(
-    onClose = { menuOpen = false },
-    onSwitchToDriver = {
-        menuOpen = false
-        onSwitchToDriver()
-    },
-    onHome = { menuOpen = false },
-    onTripHistory = {
-        menuOpen = false
-        onTripHistory()
-    },
-    onPaymentMethods = {
-        menuOpen = false
-        onPaymentMethods()
-    },
-    onSafety = {
-        menuOpen = false
-        onSafety()
-    },
-    onSettings = {
-        menuOpen = false
-        onSettings()
+                onClose = { menuOpen = false },
+                onSwitchToDriver = {
+                    menuOpen = false
+                    onSwitchToDriver()
+                },
+                onHome = { menuOpen = false },
+                onTripHistory = {
+                    menuOpen = false
+                    onTripHistory()
+                },
+                onPaymentMethods = {
+                    menuOpen = false
+                    onPaymentMethods()
+                },
+                onSafety = {
+                    menuOpen = false
+                    onSafety()
+                },
+                onSettings = {
+                    menuOpen = false
+                    onSettings()
+                }
+            )
+        }
     }
-)
+}
 
 @Composable
 private fun TopBar(
