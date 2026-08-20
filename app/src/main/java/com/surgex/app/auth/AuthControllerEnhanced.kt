@@ -188,11 +188,11 @@ class AuthControllerEnhanced {
         
         return try {
             db.collection("users").document(uid)
-                .update(
+                .update(mapOf(
                     "driverProfile" to driverProfile,
                     "role" to "DRIVER",
                     "activeMode" to "DRIVER"
-                ).await()
+                )).await()
             AuthResult.Success
         } catch (e: Exception) {
             AuthResult.Error(e.message ?: "Failed to save driver profile.")
