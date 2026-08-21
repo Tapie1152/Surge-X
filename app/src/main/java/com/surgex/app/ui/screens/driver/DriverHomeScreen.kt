@@ -1,5 +1,7 @@
 package com.surgex.app.ui.screens.driver
 
+import android.content.Context
+import android.media.RingtoneManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,6 +22,18 @@ import com.surgex.app.ui.theme.SurgeBlack
 import com.surgex.app.ui.theme.SurgeGrey
 import com.surgex.app.ui.theme.SurgeSurface
 import com.surgex.app.ui.theme.SurgeWhite
+
+private fun playNotificationSound(context: Context) {
+    try {
+        val notification = RingtoneManager.getDefaultUri(
+            RingtoneManager.TYPE_NOTIFICATION
+        )
+        val ringtone = RingtoneManager.getRingtone(context, notification)
+        ringtone?.play()
+    } catch (e: Exception) {
+        // ignore if sound fails
+    }
+}
 
 @Composable
 fun DriverHomeScreen(
@@ -30,6 +45,7 @@ fun DriverHomeScreen(
     onSafetyClick: () -> Unit = {}
 ) {
     var isOnline by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -135,16 +151,7 @@ fun DriverHomeScreen(
 
                                 // Play sound when going online
                                 if (newValue) {
-                                    try {
-                                        val context = androidx.compose.ui.platform.LocalContext.current
-                                        val notification = android.media.RingtoneManager.getDefaultUri(
-                                            android.media.RingtoneManager.TYPE_NOTIFICATION
-                                        )
-                                        val ringtone = android.media.RingtoneManager.getRingtone(context, notification)
-                                        ringtone?.play()
-                                    } catch (e: Exception) {
-                                        // ignore if sound fails
-                                    }
+                                    playNotificationSound(context)
                                 }
                             },
                             colors = SwitchDefaults.colors(
