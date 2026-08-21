@@ -32,6 +32,8 @@ fun DriverRideRequestScreen(
         mutableIntStateOf(15)
     }
 
+    var showSafetyDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
 
         while (secondsLeft > 0) {
@@ -49,9 +51,6 @@ fun DriverRideRequestScreen(
     val infiniteTransition = rememberInfiniteTransition(
         label = "requestPulse"
     )
-
-var showSafetyDialog by remember { mutableStateOf(false) }
-var showSafetyDialog by remember { mutableStateOf(false) }
 
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -80,46 +79,47 @@ var showSafetyDialog by remember { mutableStateOf(false) }
 
         RequestDetails(
             secondsLeft = secondsLeft,
-            onAccept = onAccept,
+            onAccept = { showSafetyDialog = true },
             onDecline = onDecline
         )
 
-if (showSafetyDialog) {
-    AlertDialog(
-        onDismissRequest = { showSafetyDialog = false },
-        title = {
-            Text("Do you feel safe?", fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Text("Are you comfortable taking this ride?\n\nIf you select No, your live location will be shared with SurgeX monitoring and your emergency contact.")
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    showSafetyDialog = false
-                    onAccept()          // Driver feels safe → start the ride
-                }
-            ) {
-                Text("YES, I FEEL SAFE", color = Color(0xFF00C853))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    showSafetyDialog = false
-                    // Later we will send location to monitoring + emergency contact
-                    onDecline()         // For now just decline the ride
-                }
-            ) {
-                Text("NO, CANCEL RIDE", color = Color.Red)
-            }
-        },
-        containerColor = Color(0xFF1A1A1A),
-        titleContentColor = Color.White,
-        textContentColor = Color.LightGray
-    )
-
-   }
+        if (showSafetyDialog) {
+            AlertDialog(
+                onDismissRequest = { showSafetyDialog = false },
+                title = {
+                    Text("Do you feel safe?", fontWeight = FontWeight.Bold)
+                },
+                text = {
+                    Text("Are you comfortable taking this ride?\n\nIf you select No, your live location will be shared with SurgeX monitoring and your emergency contact.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showSafetyDialog = false
+                            onAccept()          // Driver feels safe → start the ride
+                        }
+                    ) {
+                        Text("YES, I FEEL SAFE", color = Color(0xFF00C853))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showSafetyDialog = false
+                            // Later we will send location to monitoring + emergency contact
+                            onDecline()         // For now just decline the ride
+                        }
+                    ) {
+                        Text("NO, CANCEL RIDE", color = Color.Red)
+                    }
+                },
+                containerColor = Color(0xFF1A1A1A),
+                titleContentColor = Color.White,
+                textContentColor = Color.LightGray
+            )
+        }
+    }
+}
 
 @Composable
 private fun RequestMap(
@@ -247,23 +247,15 @@ private fun RequestDetails(
                     )
                 }
 
-Button(
-    onClick = { showSafetyDialog = true },
-    modifier = Modifier
-        .weight(1f)
-        .height(54.dp),
-    shape = RoundedCornerShape(14.dp),
-    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-) {
-    Text("ACCEPT RIDE", color = Color.Black, fontWeight = FontWeight.Bold)
-}
-
-                    Text(
-                        text = "ACCEPT RIDE",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp
-                    )
+                Button(
+                    onClick = onAccept,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(54.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                ) {
+                    Text("ACCEPT RIDE", color = Color.Black, fontWeight = FontWeight.Bold)
                 }
             }
         }
