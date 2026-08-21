@@ -47,7 +47,7 @@ fun DriverDocumentsScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text("⏳", fontSize = 64.sp)
-            Spacer(Modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 "Documents Submitted",
                 color = SurgeWhite,
@@ -64,7 +64,9 @@ fun DriverDocumentsScreen(
             Spacer(modifier = Modifier.height(40.dp))
             Button(
                 onClick = onBack,
-                modifier = Modifier.fillMaxWidth().height(54.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {
@@ -88,7 +90,9 @@ fun DriverDocumentsScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("←", color = SurgeWhite, fontSize = 28.sp, modifier = Modifier.clickable { onBack() }.padding(end = 16.dp))
+            Text("←", color = SurgeWhite, fontSize = 28.sp, modifier = Modifier
+                .clickable { onBack() }
+                .padding(end = 16.dp))
             Text("Driver Documents", color = SurgeWhite, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
 
@@ -130,39 +134,39 @@ fun DriverDocumentsScreen(
 
         Button(
             onClick = {
-    when {
-        licenseNumber.isBlank() || licenseNumber.length < 8 -> {
-            errorMessage = "Enter a valid South African driver's license number"
-        }
-        !licenseNumber.matches(Regex("^[0-9]{8,12}$")) -> {
-            errorMessage = "License number should contain only numbers (8–12 digits)"
-        }
-        idNumber.isBlank() || idNumber.length < 6 -> {
-            errorMessage = "Enter your ID Number or Passport Number"
-        }
-        idNumber.length == 13 && !idNumber.matches(Regex("^[0-9]{13}$")) -> {
-            errorMessage = "South African ID must be exactly 13 digits"
-        }
-        carBrand.isBlank() || carModel.isBlank() -> {
-            errorMessage = "Please complete vehicle brand and model"
-        }
-        carColor.isBlank() -> {
-            errorMessage = "Please enter the car colour"
-        }
-        licensePlate.isBlank() || licensePlate.length < 5 -> {
-            errorMessage = "Enter a valid license plate"
-        }
-        else -> {
-            isLoading = true
-            errorMessage = null
-            submitted = true
-            isLoading = false
-        }
-    }
-}
-          
-
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+                when {
+                    licenseNumber.isBlank() || licenseNumber.length < 8 -> {
+                        errorMessage = "Enter a valid South African driver's license number"
+                    }
+                    !licenseNumber.matches(Regex("^[0-9]{8,12}$")) -> {
+                        errorMessage = "License number should contain only numbers (8–12 digits)"
+                    }
+                    idNumber.isBlank() || idNumber.length < 6 -> {
+                        errorMessage = "Enter your ID Number or Passport Number"
+                    }
+                    idNumber.length == 13 && !idNumber.matches(Regex("^[0-9]{13}$")) -> {
+                        errorMessage = "South African ID must be exactly 13 digits"
+                    }
+                    carBrand.isBlank() || carModel.isBlank() -> {
+                        errorMessage = "Please complete vehicle brand and model"
+                    }
+                    carColor.isBlank() -> {
+                        errorMessage = "Please enter the car colour"
+                    }
+                    licensePlate.isBlank() || licensePlate.length < 5 -> {
+                        errorMessage = "Enter a valid license plate"
+                    }
+                    else -> {
+                        isLoading = true
+                        errorMessage = null
+                        submitted = true
+                        isLoading = false
+                    }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
             enabled = !isLoading
