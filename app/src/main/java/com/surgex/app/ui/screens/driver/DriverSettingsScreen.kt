@@ -20,20 +20,19 @@ import com.surgex.app.ui.theme.SurgeWhite
 fun DriverSettingsScreen(
     onBack: () -> Unit
 ) {
+    var onlineStatus by remember { mutableStateOf(true) }
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var soundEnabled by remember { mutableStateOf(true) }
-    var vibrationEnabled by remember { mutableStateOf(true) }
+    var darkModeEnabled by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(SurgeBlack)
+            .padding(20.dp)
     ) {
         // Top Bar
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -52,160 +51,157 @@ fun DriverSettingsScreen(
             )
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(20.dp))
-
                 Text(
-                    "NOTIFICATIONS",
-                    color = Color(0xFF00E5FF),
+                    "Account",
+                    color = Color.Gray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    modifier = Modifier.padding(start = 16.dp)
                 )
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            item {
+                SettingItem(
+                    icon = "🟢",
+                    title = "Online Status",
+                    description = "Accept new ride requests",
+                    isToggle = true,
+                    toggleValue = onlineStatus,
+                    onToggle = { onlineStatus = it }
+                )
+            }
 
-                // Notifications Toggle
-                SettingsToggleItem(
+            item {
+                Text(
+                    "Preferences",
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+
+            item {
+                SettingItem(
                     icon = "🔔",
-                    title = "Enable Notifications",
-                    subtitle = "Receive ride requests and updates",
-                    checked = notificationsEnabled,
-                    onCheckedChange = { notificationsEnabled = it }
+                    title = "Notifications",
+                    description = "Push notifications for ride requests",
+                    isToggle = true,
+                    toggleValue = notificationsEnabled,
+                    onToggle = { notificationsEnabled = it }
                 )
+            }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SettingsToggleItem(
-                    icon = "🔊",
-                    title = "Sound",
-                    subtitle = "Play sound for notifications",
-                    checked = soundEnabled,
-                    onCheckedChange = { soundEnabled = it },
-                    enabled = notificationsEnabled
+            item {
+                SettingItem(
+                    icon = "🌙",
+                    title = "Dark Mode",
+                    description = "Dark mode enabled",
+                    isToggle = true,
+                    toggleValue = darkModeEnabled,
+                    onToggle = { darkModeEnabled = it }
                 )
+            }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SettingsToggleItem(
-                    icon = "📳",
-                    title = "Vibration",
-                    subtitle = "Vibrate on notifications",
-                    checked = vibrationEnabled,
-                    onCheckedChange = { vibrationEnabled = it },
-                    enabled = notificationsEnabled
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
+            item {
                 Text(
-                    "ACCOUNT",
-                    color = Color(0xFF00E5FF),
+                    "Other",
+                    color = Color.Gray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    modifier = Modifier.padding(start = 16.dp)
                 )
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SettingsActionItem(
-                    icon = "🔐",
-                    title = "Change Password",
-                    onClick = {}
+            item {
+                SettingItem(
+                    icon = "ℹ️",
+                    title = "About",
+                    description = "App version 1.0.0"
                 )
+            }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SettingsActionItem(
-                    icon = "🗑️",
-                    title = "Delete Account",
-                    onClick = {},
-                    isDestructive = true
+            item {
+                SettingItem(
+                    icon = "⚖️",
+                    title = "Terms & Conditions",
+                    description = "Review our policies"
                 )
-
-                Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }
 }
 
 @Composable
-private fun SettingsToggleItem(
+private fun SettingItem(
     icon: String,
     title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean = true
+    description: String,
+    isToggle: Boolean = false,
+    toggleValue: Boolean = false,
+    onToggle: (Boolean) -> Unit = {}
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .clickable { if (isToggle) onToggle(!toggleValue) },
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF121212)
+        color = Color(0xFF1A1A1A)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(icon, fontSize = 20.sp)
-                Spacer(modifier = Modifier.width(12.dp))
+                Text(icon, fontSize = 24.sp)
                 Column {
-                    Text(title, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(subtitle, color = Color.Gray, fontSize = 12.sp)
+                    Text(
+                        title,
+                        color = SurgeWhite,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        description,
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
                 }
             }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                enabled = enabled
-            )
+
+            if (isToggle) {
+                Switch(
+                    checked = toggleValue,
+                    onCheckedChange = { onToggle(it) },
+                    modifier = Modifier.scale(0.8f),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF76FF03)
+                    )
+                )
+            } else {
+                Text("›", color = Color.Gray, fontSize = 20.sp)
+            }
         }
     }
 }
 
 @Composable
-private fun SettingsActionItem(
-    icon: String,
-    title: String,
-    onClick: () -> Unit,
-    isDestructive: Boolean = false
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF121212)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(icon, fontSize = 20.sp)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                title,
-                color = if (isDestructive) Color(0xFFFF4444) else SurgeWhite,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text("→", color = Color.Gray, fontSize = 18.sp)
-        }
-    }
+private fun Modifier.scale(factor: Float): Modifier {
+    return this.size(24.dp * factor)
 }
