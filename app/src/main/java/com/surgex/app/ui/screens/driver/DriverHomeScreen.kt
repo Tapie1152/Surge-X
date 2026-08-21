@@ -2,6 +2,8 @@ package com.surgex.app.ui.screens.driver
 
 import android.content.Context
 import android.media.RingtoneManager
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,12 +41,18 @@ private fun playNotificationSound(context: Context) {
 fun DriverHomeScreen(
     onOnlineChanged: (Boolean) -> Unit = {},
     onRideRequest: () -> Unit = {},
+    onMenuClick: () -> Unit = {},
     onSwitchToRider: () -> Unit = {},
     onDocumentsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onSafetyClick: () -> Unit = {}
+    onSafetyClick: () -> Unit = {},
+    onTripHistoryClick: () -> Unit = {},
+    onEarningsClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     var isOnline by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
+    var rideRequest by remember { mutableStateOf<RideRequestData?>(null) }
     val context = LocalContext.current
 
     Box(
@@ -68,9 +76,24 @@ fun DriverHomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // Menu
-            CircleButton(text = "☰")
+            // Clickable Menu Button
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.72f))
+                    .clickable { menuOpen = true },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    repeat(3) {
+                        Box(modifier = Modifier.width(18.dp).height(2.dp).background(SurgeWhite, RoundedCornerShape(1.dp)))
+                    }
+                }
+            }
 
             Text(
                 text = "SurgeX Driver",
@@ -79,7 +102,7 @@ fun DriverHomeScreen(
                 fontWeight = FontWeight.ExtraBold
             )
 
-            // Switch back to Rider mode
+            // Quick Switch to Rider mode
             Box(
                 modifier = Modifier
                     .size(46.dp)
@@ -148,8 +171,6 @@ fun DriverHomeScreen(
                             onCheckedChange = { newValue ->
                                 isOnline = newValue
                                 onOnlineChanged(newValue)
-
-                                // Play sound when going online
                                 if (newValue) {
                                     playNotificationSound(context)
                                 }
@@ -191,7 +212,9 @@ fun DriverHomeScreen(
                             title = "Earnings",
                             emoji = "💰",
                             modifier = Modifier.weight(1f)
-                        ) {}
+                        ) {
+                            onEarningsClick()
+                        }
 
                         ActionButton(
                             title = "Support",
@@ -205,7 +228,17 @@ fun DriverHomeScreen(
                     // Simulate Ride Request (for testing)
                     if (isOnline) {
                         Button(
-                            onClick = onRideRequest,
+                            onClick = {
+                                // Simulate a ride request
+                                rideRequest = RideRequestData(
+                                    riderName = "John Doe",
+                                    pickupAddress = "Cape Town CBD",
+                                    destinationAddress = "V&A Waterfront",
+                                    estimatedFare = 85.50,
+                                    distance = 2.3
+                                )
+                                onRideRequest()
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
@@ -228,19 +261,115 @@ fun DriverHomeScreen(
                 }
             }
         }
+
+        // Side Menu Overlay
+        AnimatedVisibility(
+            visible = menuOpen,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.6f))
+                    .clickable { menuOpen = false }
+            )
+        }
+
+        // Side Menu
+        AnimatedVisibility(
+            visible = menuOpen,
+            enter = slideInHorizontally(tween(300)) { -it },
+            exit = slideOutHorizontally(tween(300)) { -it }
+        ) {
+            DriverSideMenu(
+                onClose = { menuOpen = false },
+                onDocuments = {
+                    menuOpen = false
+                    onDocumentsClick()
+                },
+                onProfile = {
+                    menuOpen = false
+                    onProfileClick()
+                },
+                onTripHistory = {
+                    menuOpen = false
+                    onTripHistoryClick()
+                },
+                onSafety = {
+                    menuOpen = false
+                    onSafetyClick()
+                },
+                onSettings = {
+                    menuOpen = false
+                    onSettingsClick()
+                },
+                onEarnings = {
+                    menuOpen = false
+                    onEarningsClick()
+                }
+            )
+        }
     }
 }
 
 @Composable
-private fun CircleButton(text: String) {
+private fun DriverSideMenu(
+    onClose: () -> Unit,
+    onDocuments: () -> Unit,
+    onProfile: () -> Unit,
+    onTripHistory: () -> Unit,
+    onSafety: () -> Unit,
+    onSettings: () -> Unit,
+    onEarnings: () -> Unit
+) {
     Box(
         modifier = Modifier
-            .size(46.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.72f)),
-        contentAlignment = Alignment.Center
+            .fillMaxHeight()
+            .width(300.dp)
+            .background(Color(0xFF0A0A0A))
+            .padding(24.dp)
     ) {
-        Text(text = text, color = SurgeWhite, fontSize = 18.sp)
+        Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(modifier = Modifier.height(48.dp))
+            Text(text = "SurgeX", color = SurgeWhite, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+            Text(text = "DRIVER MODE", color = Color(0xFF76FF03), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+            Spacer(modifier = Modifier.height(40.dp))
+            Divider(color = Color(0xFF1A1A1A))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            MenuItemRow(icon = "👤", label = "Profile", onClick = onProfile)
+            Spacer(modifier = Modifier.height(8.dp))
+            MenuItemRow(icon = "📄", label = "Documents", onClick = onDocuments)
+            Spacer(modifier = Modifier.height(8.dp))
+            MenuItemRow(icon = "🧾", label = "Trip History", onClick = onTripHistory)
+            Spacer(modifier = Modifier.height(8.dp))
+            MenuItemRow(icon = "💰", label = "Earnings", onClick = onEarnings)
+            Spacer(modifier = Modifier.height(8.dp))
+            MenuItemRow(icon = "🛡️", label = "Safety", onClick = onSafety)
+            Spacer(modifier = Modifier.height(8.dp))
+            MenuItemRow(icon = "⚙️", label = "Settings", onClick = onSettings)
+            Spacer(modifier = Modifier.height(24.dp))
+            Divider(color = Color(0xFF1A1A1A))
+            Spacer(modifier = Modifier.weight(1f))
+            Text(text = "SURGEX • EARN DIFFERENTLY", color = Color(0xFF1E1E1E), fontSize = 9.sp, letterSpacing = 2.sp)
+        }
+    }
+}
+
+@Composable
+private fun MenuItemRow(icon: String, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = icon, fontSize = 18.sp)
+        Spacer(modifier = Modifier.width(14.dp))
+        Text(text = label, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -269,3 +398,11 @@ private fun ActionButton(
         )
     }
 }
+
+data class RideRequestData(
+    val riderName: String,
+    val pickupAddress: String,
+    val destinationAddress: String,
+    val estimatedFare: Double,
+    val distance: Double
+)
