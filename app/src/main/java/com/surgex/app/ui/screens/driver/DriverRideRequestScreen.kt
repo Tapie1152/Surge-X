@@ -50,6 +50,9 @@ fun DriverRideRequestScreen(
         label = "requestPulse"
     )
 
+var showSafetyDialog by remember { mutableStateOf(false) }
+var showSafetyDialog by remember { mutableStateOf(false) }
+
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -80,8 +83,43 @@ fun DriverRideRequestScreen(
             onAccept = onAccept,
             onDecline = onDecline
         )
-    }
-}
+
+if (showSafetyDialog) {
+    AlertDialog(
+        onDismissRequest = { showSafetyDialog = false },
+        title = {
+            Text("Do you feel safe?", fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Text("Are you comfortable taking this ride?\n\nIf you select No, your live location will be shared with SurgeX monitoring and your emergency contact.")
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    showSafetyDialog = false
+                    onAccept()          // Driver feels safe → start the ride
+                }
+            ) {
+                Text("YES, I FEEL SAFE", color = Color(0xFF00C853))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    showSafetyDialog = false
+                    // Later we will send location to monitoring + emergency contact
+                    onDecline()         // For now just decline the ride
+                }
+            ) {
+                Text("NO, CANCEL RIDE", color = Color.Red)
+            }
+        },
+        containerColor = Color(0xFF1A1A1A),
+        titleContentColor = Color.White,
+        textContentColor = Color.LightGray
+    )
+
+   }
 
 @Composable
 private fun RequestMap(
@@ -209,17 +247,16 @@ private fun RequestDetails(
                     )
                 }
 
-                Button(
-                    onClick = onAccept,
-                    modifier = Modifier
-                        .weight(1.2f)
-                        .height(56.dp),
-                    shape = RoundedCornerShape(17.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SurgeWhite,
-                        contentColor = SurgeBlack
-                    )
-                ) {
+Button(
+    onClick = { showSafetyDialog = true },
+    modifier = Modifier
+        .weight(1f)
+        .height(54.dp),
+    shape = RoundedCornerShape(14.dp),
+    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+) {
+    Text("ACCEPT RIDE", color = Color.Black, fontWeight = FontWeight.Bold)
+}
 
                     Text(
                         text = "ACCEPT RIDE",

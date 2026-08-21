@@ -20,11 +20,11 @@ import kotlinx.coroutines.launch
 private enum class SurgeXScreen {
     SPLASH, ROLE_SELECTION, LOGIN, REGISTER,
     PHONE_VERIFY, OTP_VERIFY,
-    RIDER_HOME, RIDE_SELECTION, SEARCHING_DRIVER,
+    RIDER_HOME,DRIVER_PROFILE, RIDE_SELECTION, SEARCHING_DRIVER,
     DRIVER_HOME, DRIVER_RIDE_REQUEST, DRIVER_PICKUP,
     PASSENGER_VERIFICATION, LIVE_TRIP, TRIP_SUMMARY,
     RIDER_PAYMENT, RECEIPT,
-    TRIP_HISTORY, PAYMENT_METHODS, SAFETY, SETTINGS,
+    TRIP_HISTORY, PAYMENT_METHODS,DRIVER_SAFETY, SETTINGS,
     HELP, REPORT_ISSUE, DRIVER_DOCUMENTS
 }
 
@@ -60,15 +60,21 @@ fun SurgeXNavigation(
                 authController.logout()
                 checkingSession = false
                 currentScreen = SurgeXScreen.ROLE_SELECTION
-            } else {
-                selectedRole = profile.activeMode
-                preferences.edit().putString(LAST_MODE_KEY, profile.activeMode.name).apply()
-                checkingSession = false
-                currentScreen = if (profile.activeMode == UserRole.RIDER)
-                    SurgeXScreen.RIDER_HOME else SurgeXScreen.DRIVER_HOME
-            }
-        }
+            
+                 } else {
+    // For now always start in Rider mode unless driver details are approved
+    val lastMode = preferences.getString(LAST_MODE_KEY, UserRole.RIDER.name)
+    selectedRole = if (lastMode == UserRole.DRIVER.name && profile.accountStatus == "APPROVED") {
+        UserRole.DRIVER
+    } else {
+        UserRole.RIDER
     }
+    preferences.edit().putString(LAST_MODE_KEY, selectedRole.name).apply()
+    checkingSession = false
+    currentScreen = if (selectedRole == UserRole.RIDER)
+        SurgeXScreen.RIDER_HOME else SurgeXScreen.DRIVER_HOME
+}
+            
 
     if (checkingSession) {
         SplashScreen {}
@@ -182,20 +188,36 @@ fun SurgeXNavigation(
             }
         )
 
-        SurgeXScreen.DRIVER_HOME -> DriverHomeScreen(
-            onOnlineChanged = {},
-            onRideRequest = { currentScreen = SurgeXScreen.DRIVER_RIDE_REQUEST },
-            onSwitchToRider = {
-                scope.launch {
-                    val saved = authController.saveActiveMode(UserRole.RIDER)
-                    if (saved) {
-                        selectedRole = UserRole.RIDER
-                        preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
-                        currentScreen = SurgeXScreen.RIDER_HOME
-                    }
-                }
-            }
-        )
+SurgeXScreen.DRIVER_SAFETY -> DriverSafetyScreen(
+    onBack = { currentScreen = SurgeXScreen.DRIVER_HOME }
+)
+
+        
+SurgeXScreen.DRIVER_HOME -> DriverHomeScreen(
+    onOnlineChanged = {},
+    onRideRequest = { currentScreen = SurgeXScreen.DRIVER_RIDE_REQUEST },
+    onSwitchToRider = {
+        selectedRole = UserRole.RIDER
+        preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
+        scope.launch { authController.saveActiveMode(UserRole.RIDER) }
+        currentScreen = SurgeXScreen.RIDER_HOME
+    },
+onSafetyClick = {
+    currentScreen = SurgeXScreen.DRIVER_SAFETY
+},
+    onDocumentsClick = {
+        currentScreen = SurgeXScreen.DRIVER_DOCUMENTS
+    },
+    onProfileClick = {
+        currentScreen = SurgeXScreen.DRIVER_PROFILE
+    }
+)
+
+SurgeXScreen.DRIVER_PROFILE -> DriverProfileScreen(
+    onBack = { currentScreen = SurgeXScreen.DRIVER_HOME }
+)
+
+
 
         SurgeXScreen.DRIVER_RIDE_REQUEST -> DriverRideRequestScreen(
             onAccept = { currentScreen = SurgeXScreen.DRIVER_PICKUP },

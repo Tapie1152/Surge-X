@@ -25,8 +25,11 @@ fun DriverHomeScreen(
     onOnlineChanged: (Boolean) -> Unit = {},
     onRideRequest: () -> Unit = {},
     onSwitchToRider: () -> Unit = {},
-    onDocumentsClick: () -> Unit = {}
-) {
+    onDocumentsClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    onSafetyClick: () -> Unit = {}
+)
+
     var isOnline by remember { mutableStateOf(false) }
 
     Box(
@@ -126,20 +129,36 @@ fun DriverHomeScreen(
                             )
                         }
 
-                        Switch(
-                            checked = isOnline,
-                            onCheckedChange = {
-                                isOnline = it
-                                onOnlineChanged(it)
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = Color(0xFF00C853),
-                                uncheckedThumbColor = Color.White,
-                                uncheckedTrackColor = Color(0xFF333333)
-                            )
-                        )
-                    }
+                       
+Switch(
+    checked = isOnline,
+    onCheckedChange = { newValue ->
+        isOnline = newValue
+        onOnlineChanged(newValue)
+
+        // Play sound when going online
+        if (newValue) {
+            try {
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val notification = android.media.RingtoneManager.getDefaultUri(
+                    android.media.RingtoneManager.TYPE_NOTIFICATION
+                )
+                val ringtone = android.media.RingtoneManager.getRingtone(context, notification)
+                ringtone?.play()
+            } catch (e: Exception) {
+                // ignore if sound fails
+            }
+        }
+    },
+    colors = SwitchDefaults.colors(
+        checkedThumbColor = Color.White,
+        checkedTrackColor = Color(0xFF00C853),
+        uncheckedThumbColor = Color.White,
+        uncheckedTrackColor = Color(0xFF333333)
+    )
+)
+
+
 
                     Spacer(modifier = Modifier.height(18.dp))
 
