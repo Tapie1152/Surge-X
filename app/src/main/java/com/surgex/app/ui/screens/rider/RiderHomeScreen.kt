@@ -1,7 +1,6 @@
 package com.surgex.app.ui.screens.rider
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +41,9 @@ fun RiderHomeScreen(
     onPaymentMethods: () -> Unit = {},
     onSafety: () -> Unit = {},
     onSettings: () -> Unit = {},
-    onProfilePicUpload: () -> Unit = {}
+    onProfilePicUpload: () -> Unit = {},
+    devModeEnabled: Boolean = false,
+    onDeveloperClick: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
 
@@ -70,10 +71,12 @@ fun RiderHomeScreen(
             destinationLon = destinationLon
         )
 
-        // Top bar
+        // Top bar with hamburger and developer buttons
         TopBar(
             onMenuClick = { menuOpen = true },
-            onSwitchToDriver = onSwitchToDriver
+            onSwitchToDriver = onSwitchToDriver,
+            devModeEnabled = devModeEnabled,
+            onDeveloperClick = onDeveloperClick
         )
 
         // Bottom sheet
@@ -112,49 +115,38 @@ fun RiderHomeScreen(
         // Side menu overlay
         AnimatedVisibility(
             visible = menuOpen,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200))
+            enter = slideInHorizontally(initialOffsetX = { -it }),
+            exit = slideOutHorizontally(targetOffsetX = { -it })
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.6f))
+                    .background(Color.Black.copy(alpha = 0.5f))
                     .clickable { menuOpen = false }
             )
-        }
-
-        AnimatedVisibility(
-            visible = menuOpen,
-            enter = slideInHorizontally(tween(300)) { -it },
-            exit = slideOutHorizontally(tween(300)) { -it }
-        ) {
-            SideMenu(
-                onClose = { menuOpen = false },
-                onSwitchToDriver = {
-                    menuOpen = false
-                    onSwitchToDriver()
-                },
-                onHome = { menuOpen = false },
-                onTripHistory = {
+            
+            RiderMenuScreen(
+                onTripHistoryClick = {
                     menuOpen = false
                     onTripHistory()
                 },
-                onPaymentMethods = {
+                onPaymentMethodsClick = {
                     menuOpen = false
                     onPaymentMethods()
                 },
-                onSafety = {
+                onSafetyClick = {
                     menuOpen = false
                     onSafety()
                 },
-                onSettings = {
+                onSettingsClick = {
                     menuOpen = false
                     onSettings()
                 },
-                onProfilePicUpload = {
+                onProfilePicClick = {
                     menuOpen = false
                     onProfilePicUpload()
-                }
+                },
+                onClose = { menuOpen = false }
             )
         }
     }
@@ -163,7 +155,9 @@ fun RiderHomeScreen(
 @Composable
 private fun TopBar(
     onMenuClick: () -> Unit,
-    onSwitchToDriver: () -> Unit
+    onSwitchToDriver: () -> Unit,
+    devModeEnabled: Boolean = false,
+    onDeveloperClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -172,116 +166,48 @@ private fun TopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.75f))
-                .clickable { onMenuClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                repeat(3) {
-                    Box(modifier = Modifier.width(18.dp).height(2.dp).background(SurgeWhite, RoundedCornerShape(1.dp)))
-                }
-            }
-        }
-
-        Text(text = "SurgeX", color = SurgeWhite, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
-
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF0F1A0F))
-                .clickable { onSwitchToDriver() },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "🚗", fontSize = 18.sp)
+        // Hamburger Menu Button
+        CircleButton(
+            text = "≡",
+            onClick = onMenuClick
+        )
+        
+        Text(
+            text = "SurgeX",
+            color = SurgeWhite,
+            fontSize = 21.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
+        
+        // Developer Mode or Switch Button
+        if (devModeEnabled) {
+            CircleButton(
+                text = "🔨",
+                onClick = onDeveloperClick
+            )
+        } else {
+            CircleButton(
+                text = "ⓒ",
+                onClick = onSwitchToDriver
+            )
         }
     }
 }
 
 @Composable
-private fun SideMenu(
-    onClose: () -> Unit,
-    onSwitchToDriver: () -> Unit,
-    onHome: () -> Unit = {},
-    onTripHistory: () -> Unit = {},
-    onPaymentMethods: () -> Unit = {},
-    onSafety: () -> Unit = {},
-    onSettings: () -> Unit = {},
-    onProfilePicUpload: () -> Unit = {}
+private fun CircleButton(
+    text: String,
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
-            .fillMaxHeight()
-            .width(300.dp)
-            .background(Color(0xFF0A0A0A))
-            .padding(24.dp)
+            .size(46.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.72f))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Spacer(modifier = Modifier.height(48.dp))
-            Text(text = "SurgeX", color = SurgeWhite, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-            Text(text = "RIDER MODE", color = Color(0xFF00E5FF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
-            Spacer(modifier = Modifier.height(40.dp))
-            Divider(color = Color(0xFF1A1A1A))
-            Spacer(modifier = Modifier.height(24.dp))
-            MenuItemRow(icon = "🏠", label = "Home", onClick = onHome)
-            Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "👤", label = "Profile Picture", onClick = onProfilePicUpload)
-            Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "🧾", label = "Trip History", onClick = onTripHistory)
-            Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "💳", label = "Payment Methods", onClick = onPaymentMethods)
-            Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "🛡️", label = "Safety", onClick = onSafety)
-            Spacer(modifier = Modifier.height(8.dp))
-            MenuItemRow(icon = "⚙️", label = "Settings", onClick = onSettings)
-            Spacer(modifier = Modifier.height(24.dp))
-            Divider(color = Color(0xFF1A1A1A))
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0F1A0F))
-                    .clickable { onSwitchToDriver() }
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🚗", fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column {
-                        Text(text = "Switch to Driver", color = Color(0xFF76FF03), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                        Text(text = "Start earning now", color = Color(0xFF4A7A00), fontSize = 11.sp)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = "SURGEX • MOVE DIFFERENTLY", color = Color(0xFF1E1E1E), fontSize = 9.sp, letterSpacing = 2.sp)
-        }
-    }
-}
-
-@Composable
-private fun MenuItemRow(icon: String, label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = icon, fontSize = 18.sp)
-        Spacer(modifier = Modifier.width(14.dp))
-        Text(text = label, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        Text(text = text, color = SurgeWhite, fontSize = 18.sp)
     }
 }
 
@@ -297,160 +223,95 @@ private fun RideRequestSheet(
     destinationConfirmed: Boolean,
     onChooseRide: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
         Surface(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
-            color = Color(0xFF0A0A0A)
+            color = SurgeBlack
         ) {
-            Column(modifier = Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
-
+            Column(
+                modifier = Modifier.padding(horizontal = 22.dp, vertical = 20.dp)
+            ) {
                 Box(
                     modifier = Modifier
-                        .width(40.dp).height(4.dp)
+                        .width(42.dp)
+                        .height(4.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(Color(0xFF2A2A2A))
+                        .background(Color(0xFF3A3A3A))
                         .align(Alignment.CenterHorizontally)
                 )
 
                 Spacer(modifier = Modifier.height(22.dp))
 
-                Text(text = "Where to?", color = SurgeWhite, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
+                Text(
+                    text = "Where to?",
+                    color = SurgeWhite,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 LocationInput(
-                    label = "PICKUP",
+                    label = "Pickup location",
                     value = pickup,
-                    onValueChange = onPickupChange,
-                    placeholder = "Enter pickup location",
-                    dotColor = Color(0xFF00E5FF),
-                    confirmed = false
+                    enabled = false
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 LocationInput(
-                    label = "DESTINATION",
+                    label = "Destination",
                     value = destination,
-                    onValueChange = onDestinationChange,
-                    placeholder = "Where are you going?",
-                    dotColor = SurgeGrey,
-                    confirmed = destinationConfirmed
+                    onValueChange = onDestinationChange
                 )
 
-                // Search results dropdown
-                AnimatedVisibility(visible = isSearching) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color(0xFF00E5FF),
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(text = "Searching...", color = SurgeGrey, fontSize = 13.sp)
-                    }
-                }
-
                 if (searchResults.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF141414)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 150.dp)
                     ) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 200.dp)
-                        ) {
-                            items(searchResults) { place ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { onPlaceSelected(place) }
-                                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = "📍", fontSize = 14.sp)
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Column {
-                                        Text(
-                                            text = place.shortName,
-                                            color = SurgeWhite,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        Text(
-                                            text = place.displayName.split(",").drop(2).take(2).joinToString(",").trim(),
-                                            color = SurgeGrey,
-                                            fontSize = 11.sp
-                                        )
-                                    }
-                                }
-                                Divider(color = Color(0xFF1E1E1E))
-                            }
+                        items(searchResults) { place ->
+                            Text(
+                                text = place.shortName,
+                                color = SurgeWhite,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onPlaceSelected(place) }
+                                    .padding(8.dp),
+                                fontSize = 14.sp
+                            )
                         }
                     }
                 }
 
-                // Route confirmed indicator
-                if (destinationConfirmed) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0xFF001A00)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = "✓", color = Color(0xFF76FF03), fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = "Route shown on map", color = Color(0xFF4A7A00), fontSize = 12.sp)
-                        }
-                    }
-                }
-
-                if (!destinationConfirmed) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(text = "Quick destinations", color = SurgeGrey, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        QuickDestination(title = "🏠 Home", modifier = Modifier.weight(1f)) { onDestinationChange("Home Cape Town") }
-                        QuickDestination(title = "💼 Work", modifier = Modifier.weight(1f)) { onDestinationChange("Work Cape Town") }
-                        QuickDestination(title = "🕐 Recent", modifier = Modifier.weight(1f)) { onDestinationChange("Cape Town CBD") }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = onChooseRide,
-                    modifier = Modifier.fillMaxWidth().height(58.dp),
-                    shape = RoundedCornerShape(18.dp),
+                    enabled = destinationConfirmed,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SurgeWhite,
-                        contentColor = SurgeBlack,
-                        disabledContainerColor = Color(0xFF1A1A1A),
-                        disabledContentColor = SurgeGrey
-                    ),
-                    enabled = destinationConfirmed
+                        containerColor = if (destinationConfirmed) Color.White else Color.Gray
+                    )
                 ) {
                     Text(
-                        text = if (!destinationConfirmed) "SELECT A DESTINATION" else "CHOOSE A RIDE",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp
+                        "Confirm Ride",
+                        color = SurgeBlack,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
-
-                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
@@ -460,57 +321,48 @@ private fun RideRequestSheet(
 private fun LocationInput(
     label: String,
     value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    dotColor: Color,
-    confirmed: Boolean
+    onValueChange: (String) -> Unit = {},
+    enabled: Boolean = true
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (confirmed) Color(0xFF0A1A0A) else SurgeSurface)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = SurgeSurfaceLight
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .size(10.dp)
-                .background(if (confirmed) Color(0xFF76FF03) else dotColor, CircleShape)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = label, color = SurgeGrey, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
-            Spacer(modifier = Modifier.height(3.dp))
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "📍",
+                fontSize = 16.sp,
+                modifier = Modifier.padding(end = 8.dp)
+            )
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                textStyle = TextStyle(color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                enabled = enabled,
+                textStyle = TextStyle(
+                    color = SurgeWhite,
+                    fontSize = 14.sp
+                ),
                 cursorBrush = SolidColor(SurgeWhite),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    if (value.isEmpty()) Text(text = placeholder, color = Color(0xFF444444), fontSize = 14.sp)
-                    inner()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    if (value.isEmpty()) {
+                        Text(
+                            text = label,
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
+                    innerTextField()
                 }
             )
         }
-        if (confirmed) {
-            Text(text = "✓", color = Color(0xFF76FF03), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
-private fun QuickDestination(title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Box(
-        modifier = modifier
-            .height(44.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(SurgeSurfaceLight)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = title, color = SurgeWhite, fontSize = 11.sp, fontWeight = FontWeight.Medium)
     }
 }

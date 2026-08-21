@@ -1,5 +1,9 @@
 package com.surgex.app.ui.screens.rider
 
+import android.Manifest
+import android.graphics.Bitmap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,11 +24,56 @@ import com.surgex.app.ui.theme.SurgeWhite
 
 @Composable
 fun ProfilePicUploadScreen(
+    isMandatory: Boolean = false,
     onBack: () -> Unit,
     onUploadSuccess: () -> Unit
 ) {
+    val context = LocalContext.current
     var isUploading by remember { mutableStateOf(false) }
     var uploadSuccess by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<String?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            isUploading = true
+            // Simulate upload
+            uploadSuccess = true
+            isUploading = false
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            isUploading = true
+            // Simulate upload
+            uploadSuccess = true
+            isUploading = false
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch()
+        } else {
+            // Show toast: Camera permission required
+        }
+    }
+
+    val galleryPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            galleryLauncher.launch("image/*")
+        } else {
+            // Show toast: Gallery permission required
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -32,31 +82,44 @@ fun ProfilePicUploadScreen(
             .padding(20.dp)
     ) {
         // Top Bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        if (!isMandatory) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "←",
+                    color = SurgeWhite,
+                    fontSize = 28.sp,
+                    modifier = Modifier
+                        .clickable { onBack() }
+                        .padding(end = 16.dp)
+                )
+                Text(
+                    text = "Profile Picture",
+                    color = SurgeWhite,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        } else {
             Text(
-                text = "←",
-                color = SurgeWhite,
-                fontSize = 28.sp,
-                modifier = Modifier
-                    .clickable { onBack() }
-                    .padding(end = 16.dp)
-            )
-            Text(
-                text = "Profile Picture",
+                text = "Complete Your Profile",
                 color = SurgeWhite,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             // Profile Picture Preview
             Box(
@@ -66,13 +129,17 @@ fun ProfilePicUploadScreen(
                     .background(Color(0xFF1A1A1A)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("📷", fontSize = 60.sp)
+                if (uploadSuccess) {
+                    Text("✓", fontSize = 60.sp, color = Color(0xFF76FF03))
+                } else {
+                    Text("📷", fontSize = 60.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                "Add or Update Profile Picture",
+                if (isMandatory) "Add Your Profile Picture" else "Add or Update Profile Picture",
                 color = SurgeWhite,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -85,6 +152,16 @@ fun ProfilePicUploadScreen(
                 color = Color.Gray,
                 fontSize = 14.sp
             )
+
+            if (isMandatory) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "This is required to continue",
+                    color = Color(0xFF76FF03),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -114,59 +191,106 @@ fun ProfilePicUploadScreen(
                     }
                 }
             } else {
-                Button(
-                    onClick = {
-                        isUploading = true
-                        // Simulate upload delay
-                    },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    enabled = !isUploading
+                        .gap(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    if (isUploading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.Black,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            "CHOOSE PHOTO",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
+                    Button(
+                        onClick = {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        enabled = !isUploading
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text("📷", fontSize = 20.sp)
+                            Text(
+                                "Camera",
+                                color = com.surgex.app.ui.theme.SurgeBlack,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        uploadSuccess = true
-                        onUploadSuccess()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF76FF03),
-                        disabledContainerColor = Color(0xFF333333)
-                    ),
-                    enabled = !isUploading
-                ) {
-                    Text(
-                        "UPLOAD",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                    Button(
+                        onClick = {
+                            galleryPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        enabled = !isUploading
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text("🖼️", fontSize = 20.sp)
+                            Text(
+                                "Gallery",
+                                color = com.surgex.app.ui.theme.SurgeBlack,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (uploadSuccess) {
+            Button(
+                onClick = onUploadSuccess,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+            ) {
+                Text(
+                    if (isMandatory) "Continue" else "Done",
+                    color = com.surgex.app.ui.theme.SurgeBlack,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+        }
+
+        if (!isMandatory && !uploadSuccess) {
+            Button(
+                onClick = onBack,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))
+            ) {
+                Text(
+                    "Skip",
+                    color = SurgeWhite,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun RowScope.gap(size: Dp) {
+    Spacer(modifier = Modifier.width(size))
 }
