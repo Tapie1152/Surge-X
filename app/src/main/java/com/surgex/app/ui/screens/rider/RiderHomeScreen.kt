@@ -36,11 +36,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun RiderHomeScreen(
     onChooseRide: () -> Unit,
+    onMenuClick: () -> Unit = {},
     onSwitchToDriver: () -> Unit = {},
     onTripHistory: () -> Unit = {},
     onPaymentMethods: () -> Unit = {},
     onSafety: () -> Unit = {},
-    onSettings: () -> Unit = {}
+    onSettings: () -> Unit = {},
+    onProfilePicUpload: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
 
@@ -148,6 +150,10 @@ fun RiderHomeScreen(
                 onSettings = {
                     menuOpen = false
                     onSettings()
+                },
+                onProfilePicUpload = {
+                    menuOpen = false
+                    onProfilePicUpload()
                 }
             )
         }
@@ -207,7 +213,8 @@ private fun SideMenu(
     onTripHistory: () -> Unit = {},
     onPaymentMethods: () -> Unit = {},
     onSafety: () -> Unit = {},
-    onSettings: () -> Unit = {}
+    onSettings: () -> Unit = {},
+    onProfilePicUpload: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -224,6 +231,8 @@ private fun SideMenu(
             Divider(color = Color(0xFF1A1A1A))
             Spacer(modifier = Modifier.height(24.dp))
             MenuItemRow(icon = "🏠", label = "Home", onClick = onHome)
+            Spacer(modifier = Modifier.height(8.dp))
+            MenuItemRow(icon = "👤", label = "Profile Picture", onClick = onProfilePicUpload)
             Spacer(modifier = Modifier.height(8.dp))
             MenuItemRow(icon = "🧾", label = "Trip History", onClick = onTripHistory)
             Spacer(modifier = Modifier.height(8.dp))
@@ -267,23 +276,6 @@ private fun MenuItemRow(icon: String, label: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = icon, fontSize = 18.sp)
-        Spacer(modifier = Modifier.width(14.dp))
-        Text(text = label, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-    }
-}
-
-
-@Composable
-private fun MenuItemRow(icon: String, label: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { }
             .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
