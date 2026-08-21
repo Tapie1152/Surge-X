@@ -20,11 +20,11 @@ import kotlinx.coroutines.launch
 private enum class SurgeXScreen {
     SPLASH, ROLE_SELECTION, LOGIN, REGISTER,
     PHONE_VERIFY, OTP_VERIFY,
-    RIDER_HOME,DRIVER_PROFILE, RIDE_SELECTION, SEARCHING_DRIVER,
+    RIDER_HOME, RIDER_SAFETY, DRIVER_PROFILE, RIDE_SELECTION, SEARCHING_DRIVER,
     DRIVER_HOME, DRIVER_RIDE_REQUEST, DRIVER_PICKUP,
     PASSENGER_VERIFICATION, LIVE_TRIP, TRIP_SUMMARY,
     RIDER_PAYMENT, RECEIPT,
-    TRIP_HISTORY, PAYMENT_METHODS,DRIVER_SAFETY, SETTINGS,
+    TRIP_HISTORY, PAYMENT_METHODS, DRIVER_SAFETY, SETTINGS,
     HELP, REPORT_ISSUE, DRIVER_DOCUMENTS
 }
 
@@ -162,7 +162,7 @@ fun SurgeXNavigation(
             },
             onTripHistory = { currentScreen = SurgeXScreen.TRIP_HISTORY },
             onPaymentMethods = { currentScreen = SurgeXScreen.PAYMENT_METHODS },
-            onSafety = { currentScreen = SurgeXScreen.SAFETY },
+            onSafety = { currentScreen = SurgeXScreen.RIDER_SAFETY },
             onSettings = { currentScreen = SurgeXScreen.SETTINGS }
         )
 
@@ -185,6 +185,10 @@ fun SurgeXNavigation(
                 tripController.clear()
                 currentScreen = SurgeXScreen.RIDER_HOME
             }
+        )
+
+        SurgeXScreen.RIDER_SAFETY -> SafetyScreen(
+            onBack = { currentScreen = SurgeXScreen.RIDER_HOME }
         )
 
         SurgeXScreen.DRIVER_SAFETY -> DriverSafetyScreen(
@@ -293,10 +297,6 @@ fun SurgeXNavigation(
 
         SurgeXScreen.PAYMENT_METHODS -> PaymentMethodsScreen(
             preferences = preferences,
-            onBack = { currentScreen = SurgeXScreen.RIDER_HOME }
-        )
-
-        SurgeXScreen.SAFETY -> SafetyScreen(
             onBack = { currentScreen = SurgeXScreen.RIDER_HOME }
         )
 
