@@ -231,8 +231,7 @@ fun SurgeXNavigation(
         )
 
         SurgeXScreen.DRIVER_PROFILE -> DriverProfileScreen(
-            onBack = { currentScreen = SurgeXScreen.DRIVER_HOME },
-            onProfilePicUpload = { currentScreen = SurgeXScreen.PROFILE_PIC_UPLOAD }
+            onBack = { currentScreen = SurgeXScreen.DRIVER_HOME }
         )
 
         SurgeXScreen.DRIVER_TRIP_HISTORY -> DriverTripHistoryScreen(
@@ -349,8 +348,7 @@ fun SurgeXNavigation(
                 preferences.edit().putString(LAST_MODE_KEY, UserRole.RIDER.name).apply()
                 currentScreen = SurgeXScreen.RIDER_HOME
             },
-            onSaved = { currentScreen = SurgeXScreen.DRIVER_HOME },
-            onCarPhotosClick = { currentScreen = SurgeXScreen.CAR_PHOTOS_VERIFICATION }
+            onSaved = { currentScreen = SurgeXScreen.DRIVER_HOME }
         )
 
         SurgeXScreen.PROFILE_PIC_UPLOAD -> ProfilePicUploadScreen(
@@ -371,7 +369,7 @@ fun SurgeXNavigation(
 
         SurgeXScreen.DEVELOPER_MODE_SWITCH -> DeveloperModeSwitchScreen(
             devMode = devMode,
-            onDevModeToggle = { enabled ->
+            onDevModeToggle = { enabled: Boolean ->
                 devMode = enabled
                 preferences.edit().putBoolean(DEV_MODE_KEY, enabled).apply()
             },
