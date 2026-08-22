@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriverEarningsScreen(
     onBack: () -> Unit
@@ -92,7 +93,8 @@ fun DriverEarningsScreen(
 fun EarningsSummaryCard(label: String, value: String, backgroundColor: Color) {
     Card(
         modifier = Modifier
-            .weight(1f),
+            .weight(1f)
+            .fillMaxHeight(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Column(
