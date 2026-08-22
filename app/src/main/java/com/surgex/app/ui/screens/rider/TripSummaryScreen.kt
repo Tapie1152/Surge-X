@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 /**
  * Trip completion and rating screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TripSummaryScreen(
     fare: String = "R45.50",
