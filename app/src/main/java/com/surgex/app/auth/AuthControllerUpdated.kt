@@ -83,6 +83,18 @@ class AuthControllerUpdated {
         }
     }
 
+    suspend fun handleGoogleSignInResult(idToken: String): AuthResult {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            auth.signInWithCredential(credential).await()
+            AuthResult.Success
+        } catch (e: FirebaseAuthInvalidUserException) {
+            AuthResult.Error("Google account not registered.")
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Google sign-in failed.")
+        }
+    }
+
     fun sendOtp(
         phoneNumber: String,
         activity: Activity,
