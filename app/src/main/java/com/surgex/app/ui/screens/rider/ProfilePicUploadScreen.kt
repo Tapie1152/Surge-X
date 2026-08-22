@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -171,7 +171,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF2196F3)
                     )
                 ) {
-                    Icon(Icons.Default.Image, "Gallery", tint = Color.White)
+                    Icon(Icons.Default.Collections, "Gallery", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
