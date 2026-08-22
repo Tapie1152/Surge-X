@@ -362,7 +362,7 @@ fun SurgeXNavigation(
             }
         )
 
-        SurgeXScreen.CAR_PHOTOS_VERIFICATION -> CarPhotosVerificationScreen(
+        SurgeXScreen.CAR_PHOTOS_VERIFICATION -> com.surgex.app.ui.screens.driver.CarPhotosVerificationScreen(
             onBack = { currentScreen = SurgeXScreen.DRIVER_DOCUMENTS },
             onVerificationSuccess = { currentScreen = SurgeXScreen.DRIVER_DOCUMENTS }
         )
