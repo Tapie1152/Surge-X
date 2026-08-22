@@ -10,17 +10,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.surgex.app.R
 
 @Composable
 fun ProfilePicUploadScreen(
@@ -91,24 +94,15 @@ fun ProfilePicUploadScreen(
             verticalArrangement = Arrangement.Center
         ) {
             if (uploadSuccess) {
-                Card(
+                // Full screen SX logo
+                Image(
+                    painter = painterResource(id = R.drawable.surgex_icon),
+                    contentDescription = "Surge-X Logo",
                     modifier = Modifier
-                        .size(150.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Image,
-                            contentDescription = "Profile Pic",
-                            modifier = Modifier.size(60.dp),
-                            tint = Color.Gray
-                        )
-                    }
-                }
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    contentScale = ContentScale.Crop
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
                 Text("Profile Picture Uploaded Successfully!", fontWeight = FontWeight.Bold)
@@ -172,7 +166,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF2196F3)
                     )
                 ) {
-                    Icon(Icons.Default.Image, "Gallery", tint = Color.White)
+                    Icon(Icons.Default.PhotoLibrary, "Gallery", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
