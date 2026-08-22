@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 /**
  * Driver ride request screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriverRideRequestScreen(
     onAccept: () -> Unit,
