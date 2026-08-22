@@ -25,7 +25,7 @@ fun TripSummaryScreen(
     durationMinutes: Int = 15,
     onDone: () -> Unit
 ) {
-    var rating by remember { mutableStateOf(5) }
+    val rating = remember { mutableStateOf(5) }
 
     Column(
         modifier = Modifier
@@ -103,7 +103,7 @@ fun TripSummaryScreen(
                 ) {
                     repeat(5) { star ->
                         Text(
-                            if (star < rating) "⭐" else "☆",
+                            if (star < rating.value) "⭐" else "☆",
                             fontSize = 32.sp,
                             modifier = Modifier.padding(4.dp)
                         )
