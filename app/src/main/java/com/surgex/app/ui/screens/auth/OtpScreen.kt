@@ -311,14 +311,14 @@ fun OtpScreen(
                                     countdown = 60
                                     otpValue = ""
                                     errorMessage = null
-                                    authController.sendOtp(
-                                        phoneNumber = formatted,
-                                        activity = activity,
-                                        onCodeSent = {},
-                                        onAutoVerified = { onVerified() },
-                                        onError = { msg -> errorMessage = msg }
-                                    )
                                     scope.launch {
+                                        authController.sendOtp(
+                                            phoneNumber = formatted,
+                                            activity = activity,
+                                            onCodeSent = {},
+                                            onAutoVerified = { onVerified() },
+                                            onError = { msg -> errorMessage = msg }
+                                        )
                                         while (countdown > 0) {
                                             delay(1000)
                                             countdown--
