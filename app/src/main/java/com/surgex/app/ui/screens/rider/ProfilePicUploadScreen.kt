@@ -154,7 +154,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF4CAF50)
                     )
                 ) {
-                    Icon(Icons.Filled.PhotoCamera, "Camera", tint = Color.White)
+                    Icon(Icons.Default.PhotoCamera, "Camera", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Take Selfie", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -171,7 +171,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF2196F3)
                     )
                 ) {
-                    Icon(Icons.Filled.PhotoLibrary, "Gallery", tint = Color.White)
+                    Icon(Icons.Default.PhotoLibrary, "Gallery", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
