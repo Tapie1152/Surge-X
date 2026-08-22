@@ -1,170 +1,180 @@
 package com.surgex.app.ui.screens.rider
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.surgex.app.ui.theme.SurgeBlack
-import com.surgex.app.ui.theme.SurgeWhite
+import androidx.core.content.ContextCompat
 
 @Composable
 fun ProfilePicUploadScreen(
     onBack: () -> Unit,
     onUploadSuccess: () -> Unit
 ) {
-    var isUploading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var selectedImageUri by remember { mutableStateOf("") }
     var uploadSuccess by remember { mutableStateOf(false) }
+    var permissionGranted by remember { mutableStateOf(false) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            uploadSuccess = true
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri.toString()
+            uploadSuccess = true
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        permissionGranted = isGranted
+    }
+
+    LaunchedEffect(Unit) {
+        val hasCameraPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        permissionGranted = hasCameraPermission
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SurgeBlack)
-            .padding(20.dp)
+            .background(Color.White)
     ) {
-        // Top Bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "←",
-                color = SurgeWhite,
-                fontSize = 28.sp,
-                modifier = Modifier
-                    .clickable { onBack() }
-                    .padding(end = 16.dp)
+        // Header
+        TopAppBar(
+            title = { Text("Profile Picture", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, "Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.White,
+                titleContentColor = Color.Black
             )
-            Text(
-                text = "Profile Picture",
-                color = SurgeWhite,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        )
 
-        Spacer(modifier = Modifier.height(32.dp))
-
+        // Content
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Profile Picture Preview
-            Box(
-                modifier = Modifier
-                    .size(140.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF1A1A1A)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("📷", fontSize = 60.sp)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                "Add or Update Profile Picture",
-                color = SurgeWhite,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                "Upload a clear photo of yourself",
-                color = Color.Gray,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
             if (uploadSuccess) {
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF0A1A0A),
-                    modifier = Modifier.fillMaxWidth()
+                Card(
+                    modifier = Modifier
+                        .size(150.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
                 ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            "✓ Profile Picture Updated",
-                            color = Color(0xFF76FF03),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "Your profile picture has been successfully updated",
-                            color = Color(0xFF4A7A00),
-                            fontSize = 13.sp,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        Icon(
+                            Icons.Default.Image,
+                            contentDescription = "Profile Pic",
+                            modifier = Modifier.size(60.dp),
+                            tint = Color.Gray
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("Profile Picture Uploaded Successfully!", fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = onUploadSuccess,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2196F3)
+                    )
+                ) {
+                    Text("Continue", color = Color.White)
                 }
             } else {
+                Text(
+                    "Upload Profile Picture",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Choose selfie or from gallery",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Camera Button
                 Button(
                     onClick = {
-                        isUploading = true
-                        // Simulate upload delay
+                        if (permissionGranted) {
+                            cameraLauncher.launch(null)
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    enabled = !isUploading
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50)
+                    )
                 ) {
-                    if (isUploading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.Black,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            "CHOOSE PHOTO",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
+                    Icon(Icons.Default.CameraAlt, "Camera", tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Take Selfie", color = Color.White, fontWeight = FontWeight.Bold)
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
+                // Gallery Button
                 Button(
-                    onClick = {
-                        uploadSuccess = true
-                        onUploadSuccess()
-                    },
+                    onClick = { galleryLauncher.launch("image/*") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF76FF03),
-                        disabledContainerColor = Color(0xFF333333)
-                    ),
-                    enabled = !isUploading
-                ) {
-                    Text(
-                        "UPLOAD",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        containerColor = Color(0xFF2196F3)
                     )
+                ) {
+                    Icon(Icons.Default.Image, "Gallery", tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }

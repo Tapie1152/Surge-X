@@ -3,209 +3,157 @@ package com.surgex.app.ui.screens.driver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.surgex.app.ui.theme.SurgeBlack
-import com.surgex.app.ui.theme.SurgeWhite
 
 @Composable
 fun DriverSettingsScreen(
     onBack: () -> Unit
 ) {
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var soundEnabled by remember { mutableStateOf(true) }
-    var vibrationEnabled by remember { mutableStateOf(true) }
+    var ridePreferences by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SurgeBlack)
+            .background(Color.White)
     ) {
-        // Top Bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "←",
-                color = SurgeWhite,
-                fontSize = 28.sp,
-                modifier = Modifier
-                    .clickable { onBack() }
-                    .padding(end = 16.dp)
+        // Header
+        TopAppBar(
+            title = { Text("Settings", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, "Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.White,
+                titleContentColor = Color.Black
             )
-            Text(
-                text = "Settings",
-                color = SurgeWhite,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        )
 
-        LazyColumn(
+        // Settings Content
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    "NOTIFICATIONS",
-                    color = Color(0xFF00E5FF),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Notifications Toggle
-                SettingsToggleItem(
-                    icon = "🔔",
-                    title = "Enable Notifications",
-                    subtitle = "Receive ride requests and updates",
-                    checked = notificationsEnabled,
-                    onCheckedChange = { notificationsEnabled = it }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SettingsToggleItem(
-                    icon = "🔊",
-                    title = "Sound",
-                    subtitle = "Play sound for notifications",
-                    checked = soundEnabled,
-                    onCheckedChange = { soundEnabled = it },
-                    enabled = notificationsEnabled
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SettingsToggleItem(
-                    icon = "📳",
-                    title = "Vibration",
-                    subtitle = "Vibrate on notifications",
-                    checked = vibrationEnabled,
-                    onCheckedChange = { vibrationEnabled = it },
-                    enabled = notificationsEnabled
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    "ACCOUNT",
-                    color = Color(0xFF00E5FF),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SettingsActionItem(
-                    icon = "🔐",
-                    title = "Change Password",
-                    onClick = {}
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SettingsActionItem(
-                    icon = "🗑️",
-                    title = "Delete Account",
-                    onClick = {},
-                    isDestructive = true
-                )
-
-                Spacer(modifier = Modifier.height(40.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsToggleItem(
-    icon: String,
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean = true
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF121212)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(icon, fontSize = 20.sp)
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(title, color = SurgeWhite, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(subtitle, color = Color.Gray, fontSize = 12.sp)
-                }
-            }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                enabled = enabled
+            // Notifications Section
+            SettingsSectionTitle("Notifications")
+            SettingsSwitchItem(
+                title = "Enable Notifications",
+                description = "Get ride and system notifications",
+                checked = notificationsEnabled,
+                onCheckedChange = { notificationsEnabled = it }
             )
+
+            Divider()
+
+            // Preferences Section
+            SettingsSectionTitle("Preferences")
+            SettingsSwitchItem(
+                title = "Auto-Accept Rides",
+                description = "Automatically accept ride requests",
+                checked = ridePreferences,
+                onCheckedChange = { ridePreferences = it }
+            )
+
+            Divider()
+
+            // Account Section
+            SettingsSectionTitle("Account")
+            SettingsClickableItem("Profile", "Edit your profile information", Icons.Default.Person)
+            SettingsClickableItem("Bank Details", "Manage your bank account", Icons.Default.AccountBalance)
+            SettingsClickableItem("Documents", "View and update documents", Icons.Default.Description)
+
+            Divider()
+
+            // Support Section
+            SettingsSectionTitle("Support")
+            SettingsClickableItem("Help & FAQs", "Get help and answers", Icons.Default.Help)
+            SettingsClickableItem("Report Issue", "Report a problem", Icons.Default.BugReport)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Logout Button
+            Button(
+                onClick = { /* TODO: Implement logout */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFD32F2F)
+                )
+            ) {
+                Text("Logout", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
 
 @Composable
-private fun SettingsActionItem(
-    icon: String,
-    title: String,
-    onClick: () -> Unit,
-    isDestructive: Boolean = false
-) {
-    Surface(
+fun SettingsSectionTitle(title: String) {
+    Text(
+        title,
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        color = Color.Gray,
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 12.dp)
+    )
+}
+
+@Composable
+fun SettingsSwitchItem(title: String, description: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF121212)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(description, fontSize = 12.sp, color = Color.Gray)
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+fun SettingsClickableItem(title: String, description: String, icon: ImageVector) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { /* TODO: Handle click */ }
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(icon, fontSize = 20.sp)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                title,
-                color = if (isDestructive) Color(0xFFFF4444) else SurgeWhite,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text("→", color = Color.Gray, fontSize = 18.sp)
+            Icon(icon, title, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(title, fontWeight = FontWeight.SemiBold)
+                Text(description, fontSize = 12.sp, color = Color.Gray)
+            }
         }
+        Icon(Icons.Default.ChevronRight, "Navigate", tint = Color.Gray)
     }
 }
