@@ -71,9 +71,9 @@ fun DriverEarningsScreen(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                EarningsSummaryCard("Trips", "12", Color(0xFF4CAF50))
-                EarningsSummaryCard("Distance", "45.2 km", Color(0xFFFF9800))
-                EarningsSummaryCard("Time", "4h 30m", Color(0xFF9C27B0))
+                EarningsSummaryCard("Trips", "12", Color(0xFF4CAF50), Modifier.weight(1f))
+                EarningsSummaryCard("Distance", "45.2 km", Color(0xFFFF9800), Modifier.weight(1f))
+                EarningsSummaryCard("Time", "4h 30m", Color(0xFF9C27B0), Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -90,10 +90,9 @@ fun DriverEarningsScreen(
 }
 
 @Composable
-fun EarningsSummaryCard(label: String, value: String, backgroundColor: Color) {
+fun EarningsSummaryCard(label: String, value: String, backgroundColor: Color, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
-            .weight(1f, fill = true)
+        modifier = modifier
             .fillMaxHeight(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
