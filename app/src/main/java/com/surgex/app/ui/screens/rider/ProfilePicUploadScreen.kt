@@ -9,8 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.surgex.app.R
+import android.net.Uri
+import java.io.File
 
 @Composable
 fun ProfilePicUploadScreen(
@@ -137,7 +139,8 @@ fun ProfilePicUploadScreen(
                 Button(
                     onClick = {
                         if (permissionGranted) {
-                            cameraLauncher.launch(null)
+                            val tempUri = Uri.fromFile(File(context.cacheDir, "temp_image.jpg"))
+                            cameraLauncher.launch(tempUri)
                         } else {
                             permissionLauncher.launch(Manifest.permission.CAMERA)
                         }
@@ -149,7 +152,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF4CAF50)
                     )
                 ) {
-                    Icon(Icons.Default.CameraAlt, "Camera", tint = Color.White)
+                    Icon(Icons.Outlined.CameraAlt, "Camera", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Take Selfie", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -166,7 +169,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF2196F3)
                     )
                 ) {
-                    Icon(Icons.Default.PhotoLibrary, "Gallery", tint = Color.White)
+                    Icon(Icons.Outlined.PhotoLibrary, "Gallery", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
