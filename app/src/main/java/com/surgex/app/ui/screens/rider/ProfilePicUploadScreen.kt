@@ -10,8 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -154,7 +154,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF4CAF50)
                     )
                 ) {
-                    Icon(Icons.Outlined.CameraAlt, "Camera", tint = Color.White)
+                    Icon(Icons.Filled.PhotoCamera, "Camera", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Take Selfie", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -171,7 +171,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF2196F3)
                     )
                 ) {
-                    Icon(Icons.Outlined.PhotoLibrary, "Gallery", tint = Color.White)
+                    Icon(Icons.Filled.PhotoLibrary, "Gallery", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
