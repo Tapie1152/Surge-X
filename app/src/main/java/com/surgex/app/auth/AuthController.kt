@@ -1,5 +1,6 @@
 package com.surgex.app.auth
 
+import android.app.Activity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -18,14 +19,84 @@ class AuthController {
     val userRole: StateFlow<UserRole> = _userRole
 
     /**
-     * Login user with phone and OTP
+     * Login user with email and password
      */
-    fun login(phoneNumber: String, otp: String): Result<User> {
+    suspend fun login(email: String, password: String): AuthResult {
+        return try {
+            // TODO: Verify credentials with backend
+            val user = User(
+                id = "USER_${System.currentTimeMillis()}",
+                phoneNumber = "",
+                name = "User",
+                email = email,
+                profilePictureUrl = null,
+                accountStatus = "APPROVED",
+                activeMode = UserRole.RIDER,
+                createdAt = java.time.LocalDateTime.now()
+            )
+            _currentUser.value = user
+            _isLoggedIn.value = true
+            _userRole.value = user.activeMode
+            AuthResult.Success
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Login failed")
+        }
+    }
+
+    /**
+     * Sign in with Google
+     */
+    suspend fun signInWithGoogle(activity: Activity): AuthResult {
+        return try {
+            // TODO: Implement Google Sign-In logic
+            val user = User(
+                id = "USER_${System.currentTimeMillis()}",
+                phoneNumber = "",
+                name = "Google User",
+                email = "user@surgex.app",
+                profilePictureUrl = null,
+                accountStatus = "APPROVED",
+                activeMode = UserRole.RIDER,
+                createdAt = java.time.LocalDateTime.now()
+            )
+            _currentUser.value = user
+            _isLoggedIn.value = true
+            _userRole.value = user.activeMode
+            AuthResult.Success
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Google Sign-In failed")
+        }
+    }
+
+    /**
+     * Send OTP to phone number
+     */
+    suspend fun sendOtp(
+        phoneNumber: String,
+        activity: Activity,
+        onCodeSent: () -> Unit,
+        onAutoVerified: () -> Unit,
+        onError: (String) -> Unit
+    ): AuthResult {
+        return try {
+            // TODO: Implement OTP sending logic
+            onCodeSent()
+            AuthResult.Success
+        } catch (e: Exception) {
+            onError(e.message ?: "Failed to send OTP")
+            AuthResult.Error(e.message ?: "Failed to send OTP")
+        }
+    }
+
+    /**
+     * Verify OTP code
+     */
+    suspend fun verifyOtp(otp: String): AuthResult {
         return try {
             // TODO: Verify OTP with backend
             val user = User(
                 id = "USER_${System.currentTimeMillis()}",
-                phoneNumber = phoneNumber,
+                phoneNumber = "",
                 name = "User",
                 email = "user@surgex.app",
                 profilePictureUrl = null,
@@ -36,32 +107,38 @@ class AuthController {
             _currentUser.value = user
             _isLoggedIn.value = true
             _userRole.value = user.activeMode
-            Result.success(user)
+            AuthResult.Success
         } catch (e: Exception) {
-            Result.failure(e)
+            AuthResult.Error(e.message ?: "OTP verification failed")
         }
     }
 
     /**
      * Register new user
      */
-    fun register(phoneNumber: String, name: String, email: String): Result<User> {
+    suspend fun register(
+        name: String,
+        email: String,
+        phone: String,
+        password: String,
+        role: UserRole
+    ): AuthResult {
         return try {
             val user = User(
                 id = "USER_${System.currentTimeMillis()}",
-                phoneNumber = phoneNumber,
+                phoneNumber = phone,
                 name = name,
                 email = email,
                 profilePictureUrl = null,
                 accountStatus = "PENDING",
-                activeMode = UserRole.RIDER,
+                activeMode = role,
                 createdAt = java.time.LocalDateTime.now()
             )
             _currentUser.value = user
             _isLoggedIn.value = false
-            Result.success(user)
+            AuthResult.Success
         } catch (e: Exception) {
-            Result.failure(e)
+            AuthResult.Error(e.message ?: "Registration failed")
         }
     }
 
@@ -154,4 +231,9 @@ data class User(
 
 enum class UserRole {
     RIDER, DRIVER
+}
+
+sealed class AuthResult {
+    object Success : AuthResult()
+    data class Error(val message: String) : AuthResult()
 }
