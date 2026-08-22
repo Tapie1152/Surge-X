@@ -11,8 +11,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.AccountBalance
-import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -81,8 +81,8 @@ fun DriverSettingsScreen(
             // Account Section
             SettingsSectionTitle("Account")
             SettingsClickableItem("Profile", "Edit your profile information", Icons.Default.Person)
-            SettingsClickableItem("Bank Details", "Manage your bank account", Icons.Outlined.AccountBalance)
-            SettingsClickableItem("Documents", "View and update documents", Icons.Outlined.Description)
+            SettingsClickableItem("Bank Details", "Manage your bank account", Icons.Outlined.CreditCard)
+            SettingsClickableItem("Documents", "View and update documents", Icons.Outlined.Edit)
 
             Divider()
 
