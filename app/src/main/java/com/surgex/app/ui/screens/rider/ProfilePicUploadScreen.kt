@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +27,7 @@ import com.surgex.app.R
 import android.net.Uri
 import java.io.File
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfilePicUploadScreen(
     onBack: () -> Unit,
@@ -169,7 +170,7 @@ fun ProfilePicUploadScreen(
                         containerColor = Color(0xFF2196F3)
                     )
                 ) {
-                    Icon(Icons.Outlined.Image, "Gallery", tint = Color.White)
+                    Icon(Icons.Outlined.Collections, "Gallery", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold)
                 }
