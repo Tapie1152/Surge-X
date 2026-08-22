@@ -2,7 +2,6 @@ package com.surgex.app.util
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.surgex.app.ui.navigation.SurgeXScreen
 
 class PersistenceManager(context: Context) {
     private val preferences: SharedPreferences = context.getSharedPreferences(
