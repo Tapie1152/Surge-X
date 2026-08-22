@@ -66,6 +66,31 @@ class AuthController {
     }
 
     /**
+     * Handle Google Sign-In with ID token
+     */
+    suspend fun handleGoogleSignInResult(idToken: String): AuthResult {
+        return try {
+            // TODO: Verify idToken with backend
+            val user = User(
+                id = "USER_${System.currentTimeMillis()}",
+                phoneNumber = "",
+                name = "Google User",
+                email = "user@surgex.app",
+                profilePictureUrl = null,
+                accountStatus = "APPROVED",
+                activeMode = UserRole.RIDER,
+                createdAt = java.time.LocalDateTime.now()
+            )
+            _currentUser.value = user
+            _isLoggedIn.value = true
+            _userRole.value = user.activeMode
+            AuthResult.Success
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Google Sign-In failed")
+        }
+    }
+
+    /**
      * Switch between rider and driver mode
      */
     fun switchMode(role: UserRole) {
