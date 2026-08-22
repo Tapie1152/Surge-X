@@ -93,7 +93,7 @@ fun DriverEarningsScreen(
 fun EarningsSummaryCard(label: String, value: String, backgroundColor: Color) {
     Card(
         modifier = Modifier
-            .weight(1f)
+            .weight(1f, fill = true)
             .fillMaxHeight(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
