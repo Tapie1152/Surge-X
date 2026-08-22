@@ -232,8 +232,3 @@ data class User(
 enum class UserRole {
     RIDER, DRIVER
 }
-
-sealed class AuthResult {
-    object Success : AuthResult()
-    data class Error(val message: String) : AuthResult()
-}
