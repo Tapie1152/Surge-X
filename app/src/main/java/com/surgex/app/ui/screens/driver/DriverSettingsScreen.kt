@@ -82,8 +82,8 @@ fun DriverSettingsScreen(
 
             // Support Section
             SettingsSectionTitle("Support")
-            SettingsClickableItem("Help & FAQs", "Get help and answers", Icons.Default.Help)
-            SettingsClickableItem("Report Issue", "Report a problem", Icons.Default.BugReport)
+            SettingsClickableItem("Help & FAQs", "Get help and answers", Icons.Default.Info)
+            SettingsClickableItem("Report Issue", "Report a problem", Icons.Default.Warning)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -155,6 +155,6 @@ fun SettingsClickableItem(title: String, description: String, icon: ImageVector)
                 Text(description, fontSize = 12.sp, color = Color.Gray)
             }
         }
-        Icon(Icons.Default.ChevronRight, "Navigate", tint = Color.Gray)
+        Icon(Icons.Default.KeyboardArrowRight, "Navigate", tint = Color.Gray)
     }
 }
