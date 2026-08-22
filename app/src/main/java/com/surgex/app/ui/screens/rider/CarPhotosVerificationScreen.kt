@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import java.io.File
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarPhotosVerificationScreen(
     onBack: () -> Unit,
