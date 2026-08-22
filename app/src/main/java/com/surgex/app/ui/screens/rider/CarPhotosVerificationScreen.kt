@@ -2,6 +2,8 @@ package com.surgex.app.ui.screens.rider
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -10,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import java.io.File
 
 @Composable
 fun CarPhotosVerificationScreen(
@@ -34,6 +37,7 @@ fun CarPhotosVerificationScreen(
     var leftPhotoUploaded by remember { mutableStateOf(false) }
     var rightPhotoUploaded by remember { mutableStateOf(false) }
     var permissionGranted by remember { mutableStateOf(false) }
+    var lastPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -48,7 +52,10 @@ fun CarPhotosVerificationScreen(
     ) { isGranted ->
         permissionGranted = isGranted
         if (isGranted) {
-            cameraLauncher.launch(null)
+            val photoFile = File(context.cacheDir, "temp_photo_${System.currentTimeMillis()}.jpg")
+            val photoUri = Uri.fromFile(photoFile)
+            lastPhotoUri = photoUri
+            cameraLauncher.launch(photoUri)
         }
     }
 
@@ -174,7 +181,7 @@ fun CarPhotoUploadItem(
                 )
             } else {
                 IconButton(onClick = onClick) {
-                    Icon(Icons.Default.CameraAlt, "Upload")
+                    Icon(Icons.Outlined.CameraAlt, "Upload")
                 }
             }
         }
