@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 /**
  * Ride selection screen with dynamic pricing display
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RideSelectionScreen(
     onBack: () -> Unit,
