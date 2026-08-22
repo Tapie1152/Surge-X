@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -76,8 +81,8 @@ fun DriverSettingsScreen(
             // Account Section
             SettingsSectionTitle("Account")
             SettingsClickableItem("Profile", "Edit your profile information", Icons.Default.Person)
-            SettingsClickableItem("Bank Details", "Manage your bank account", Icons.Default.AccountBalance)
-            SettingsClickableItem("Documents", "View and update documents", Icons.Default.Description)
+            SettingsClickableItem("Bank Details", "Manage your bank account", Icons.Outlined.AccountBalance)
+            SettingsClickableItem("Documents", "View and update documents", Icons.Outlined.Description)
 
             Divider()
 
